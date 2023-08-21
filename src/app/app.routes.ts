@@ -4,44 +4,53 @@ import {
   redirectLoggedInTo,
   redirectUnauthorizedTo,
 } from '@angular/fire/auth-guard';
+import { appTitle } from './app.config';
 
 const redirectUnauthorizedToLogin = () => redirectUnauthorizedTo(['login']);
 const redirectLoggedInToDashBoard = () => redirectLoggedInTo(['']);
+const appName = 'LeMarché Portail Admin';
 
 export const routes: Routes = [
   {
     path: 'login',
-    title: 'Login - LeMarché Admin',
+    title: `Login - ${appName}`,
     loadComponent: () => import('./components/auth/login.component'),
     ...canActivate(redirectLoggedInToDashBoard),
   },
   {
+    path: 'email-link-redirection',
+    title: `Redirection Email Link - ${appName}`,
+    loadComponent: () =>
+      import('./components/auth/email-link-redirection.component'),
+    ...canActivate(redirectLoggedInToDashBoard),
+  },
+  {
     path: '',
-    title: 'Dashboard - LeMarché Admin',
+    title: `Dashboard - ${appName}`,
     loadComponent: () => import('./components/dashboard/dashboard.component'),
     ...canActivate(redirectUnauthorizedToLogin),
     children: [
       {
         path: 'ge-stock',
-        title: 'Gestion de stock - LeMarché Admin',
+        title: `Gestion de stock - ${appName}`,
         loadComponent: () =>
           import('./components/dashboard/ge-stock/ge-stock.component'),
         children: [
           {
             path: 'sell',
-            title: 'Vente - LeMarché Admin',
+            title: `Vente - ${appName}`,
             loadComponent: () =>
               import('./components/dashboard/ge-stock/sell/sell.component'),
           },
           {
             path: 'stock',
-            title: 'Stock - LeMarché Admin',
+            title: `Stock - ${appName}`,
             loadComponent: () =>
               import('./components/dashboard/ge-stock/stock/stock.component'),
           },
           {
             path: 'purcharse',
-            title: 'Approvisionnement - LeMarché Admin',
+            title: `Approvisionnement - ${appName}`,
             loadComponent: () =>
               import(
                 './components/dashboard/ge-stock/purchase/purchase.component'
@@ -49,7 +58,7 @@ export const routes: Routes = [
           },
           {
             path: 'archive',
-            title: 'Archive - LeMarché Admin',
+            title: `Archive - ${appName}`,
             loadComponent: () =>
               import(
                 './components/dashboard/ge-stock/archive/archive.component'
@@ -59,13 +68,13 @@ export const routes: Routes = [
       },
       {
         path: 'finance',
-        title: 'Finance - LeMarché Admin',
+        title: `Finance - ${appName}`,
         loadComponent: () =>
           import('./components/dashboard/finance/finance.component'),
       },
       {
         path: 'setting',
-        title: 'Paramètre - LeMarché Admin',
+        title: `Paramètre - ${appName}`,
         loadComponent: () =>
           import('./components/dashboard/setting/setting.component'),
       },
