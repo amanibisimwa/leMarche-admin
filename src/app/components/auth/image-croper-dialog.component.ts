@@ -59,8 +59,7 @@ export class ImageCroperDialogComponent {
   ) {}
 
   imageCropped(event: ImageCroppedEvent) {
-    const file = base64ToFile(event.objectUrl!);
-    this.uts.croppedImage = this.ss.uploadImgToStorage(file);
+    this.uts.croppedImage = this.ss.uploadImgToStorage(event.blob!);
   }
 
   loadImageFailed() {

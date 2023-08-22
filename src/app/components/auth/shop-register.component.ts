@@ -249,6 +249,7 @@ export class ShopRegisterComponent implements OnDestroy {
       description: this.description?.value,
       email: this.email?.value,
       phone: this.phone?.value,
+      logoUrlImg: this.croppedImage,
       created: serverTimestamp(),
     };
 
