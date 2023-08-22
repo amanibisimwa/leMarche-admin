@@ -64,6 +64,7 @@ export const routes: Routes = [
                 './components/dashboard/ge-stock/archive/archive.component'
               ),
           },
+          { path: '', pathMatch: 'full', redirectTo: 'sell' },
         ],
       },
       {
