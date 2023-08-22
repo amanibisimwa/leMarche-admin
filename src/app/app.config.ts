@@ -20,6 +20,8 @@ import {
 
 import { provideStorage, getStorage } from '@angular/fire/storage';
 
+export const appTitle = 'LeMarché Portail Admin';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideAnimations(),
