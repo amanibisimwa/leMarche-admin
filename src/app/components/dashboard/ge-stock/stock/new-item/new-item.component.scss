@@ -1,0 +1,14 @@
+.fied-in-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  & > * {
+    width: 49%;
+    min-width: 13rem;
+  }
+}
+
+.description-field {
+  width: 100%;
+}

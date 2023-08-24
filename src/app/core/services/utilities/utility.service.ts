@@ -5,7 +5,6 @@ import { Injectable } from '@angular/core';
 })
 export class UtilityService {
   croppedImage!: Promise<string>;
-  croppedLogo = () => this.croppedImage;
 
   toPascalCase(str: String) {
     const words = str.split(' ');

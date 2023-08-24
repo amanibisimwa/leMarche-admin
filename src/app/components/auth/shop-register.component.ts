@@ -208,7 +208,7 @@ export class ShopRegisterComponent implements OnDestroy {
       });
       this.dialogSubs = dialogRef.afterClosed().subscribe(async () => {
         this.isCroppedImgPending = true;
-        this.croppedImage = await this.uts.croppedLogo();
+        this.croppedImage = await this.uts.croppedImage;
         this.isCroppedImgPending = false;
       });
     }

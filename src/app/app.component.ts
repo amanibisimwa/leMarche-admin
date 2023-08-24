@@ -26,7 +26,6 @@ export class AppComponent {
     }
 
     effect(() => {
-      //console.log(`The current count is: ${count()}`);
       const theme = this.sts.theme();
       if (theme === 'device-theme' || !theme) {
         const isLightOn = matchMedia('(prefers-color-scheme: light)').matches;

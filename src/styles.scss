@@ -7,6 +7,15 @@
 body {
   margin: 0;
   font-family: "Poppins", sans-serif;
+
+  &::-webkit-scrollbar {
+    width: 0.6rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 0.5rem;
+    background: darkgray;
+  }
 }
 
 $leMarcheAdmin-primary: mat.define-palette(mat.$amber-palette);
