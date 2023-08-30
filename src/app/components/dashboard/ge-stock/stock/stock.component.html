@@ -86,67 +86,15 @@
         ></td>
       </ng-container>
 
-      <ng-container matColumnDef="purchasePrice">
+      <ng-container matColumnDef="sellingPrice">
         <th
           mat-header-cell
           *matHeaderCellDef
           mat-sort-header
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          matTooltip="Prix de vente unitaire"
         >
-          Prix d'achat
+          PV
         </th>
-        <td
-          mat-cell
-          *matCellDef="let item"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
-        >
-          {{ item.purchasePrice | number }}
-        </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        ></td>
-      </ng-container>
-
-      <ng-container matColumnDef="purchaseTotalPrice">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          PA Total
-        </th>
-        <td
-          mat-cell
-          *matCellDef="let item"
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          {{ item.purchasePrice * item.quantity | number }}
-        </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          {{ purchaseTotalSum() | number }}$
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="sellingPrice">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>PV</th>
         <td mat-cell *matCellDef="let item">
           {{ item.sellingPrice | number }}
         </td>
@@ -164,6 +112,7 @@
         <th
           mat-header-cell
           *matHeaderCellDef
+          matTooltip="Prix de vente total"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
@@ -190,6 +139,69 @@
           "
         >
           {{ sellingTotalSum() | number }}$
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="profit">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          matTooltip="Bénéfice unitaire"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          Bénefice
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          {{ item.sellingPrice - item.purchasePrice | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalProfit">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          matTooltip="Bénéfice total"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          B Total
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{
+            (item.sellingPrice - item.purchasePrice) * item.quantity | number
+          }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ profitTotalSum() | number }}$
         </td>
       </ng-container>
 
@@ -264,6 +276,22 @@
                   <p>
                     Prix de vente total:
                     <b> {{ item.sellingPrice * item.quantity | number }} $</b>
+                  </p>
+                  <p>
+                    Bénéfice unitaire:
+                    <b>
+                      {{ item.sellingPrice - item.purchasePrice | number }} $</b
+                    >
+                  </p>
+                  <p>
+                    Bénéfice total:
+                    <b>
+                      {{
+                        (item.sellingPrice - item.purchasePrice) * item.quantity
+                          | number
+                      }}
+                      $</b
+                    >
                   </p>
                   <p>
                     Stock de sécurité : <b> {{ item.satetyStock }}</b>

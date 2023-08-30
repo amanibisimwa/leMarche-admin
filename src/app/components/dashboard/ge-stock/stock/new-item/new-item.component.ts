@@ -35,7 +35,6 @@ import { Category } from 'src/app/core/models/shop.category.model';
   standalone: true,
   imports: [
     CommonModule,
-    CommonModule,
     MatDividerModule,
     MatIconModule,
     MatDialogModule,

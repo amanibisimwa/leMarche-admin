@@ -1,0 +1,99 @@
+<form [formGroup]="purchaseForm">
+  <h1 mat-dialog-title>
+    {{
+      purchase
+        ? "Modifier cet apprivisionnement"
+        : "Ajouter un approvisionnement"
+    }}
+  </h1>
+  <mat-divider></mat-divider>
+
+  <div mat-dialog-content>
+    <mat-form-field appearance="outline" class="width-full">
+      <mat-label>Article approvisionné</mat-label>
+      <input
+        type="text"
+        matInput
+        formControlName="item"
+        [matAutocomplete]="auto"
+      />
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        [displayWith]="displayFn"
+        requireSelection
+        autoActiveFirstOption
+      >
+        <mat-option *ngFor="let item of filteredItems | async" [value]="item">
+          {{ item.title }}
+        </mat-option>
+      </mat-autocomplete>
+      <mat-error *ngIf="purchaseForm.controls.item?.hasError('required')"
+        >Séléctionnez un item</mat-error
+      >
+    </mat-form-field>
+    <div class="fied-in-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Prix d'achat</mat-label>
+        <input matInput placeholder="Ex: 100" formControlName="purchasePrice" />
+        <mat-error
+          *ngIf="purchaseForm.controls.purchasePrice?.hasError('required')"
+          >Indiquez le prix d'achat svp !</mat-error
+        >
+        <mat-error
+          *ngIf="
+            purchaseForm.controls.purchasePrice?.hasError('pattern') &&
+            !purchaseForm.controls.purchasePrice?.hasError('required')
+          "
+        >
+          Entrez que les chiffres
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Prix de vente</mat-label>
+        <input matInput placeholder="Ex: 120" formControlName="sellingPrice" />
+        <mat-error
+          *ngIf="purchaseForm.controls.sellingPrice?.hasError('required')"
+          >Indiquez le prix de vente svp !</mat-error
+        >
+        <mat-error
+          *ngIf="
+            purchaseForm.controls.sellingPrice?.hasError('pattern') &&
+            !purchaseForm.controls.sellingPrice?.hasError('required')
+          "
+        >
+          Entrez que les chiffres
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="width-full">
+      <mat-label>Quantité</mat-label>
+      <input matInput placeholder="Ex: 10" formControlName="quantity" />
+      <mat-error *ngIf="purchaseForm.controls.quantity?.hasError('required')"
+        >Indiquez la quantité svp !</mat-error
+      >
+      <mat-error
+        *ngIf="
+          purchaseForm.controls.quantity?.hasError('pattern') &&
+          !purchaseForm.controls.quantity?.hasError('required')
+        "
+      >
+        Entrez que les chiffres
+      </mat-error>
+    </mat-form-field>
+  </div>
+  <mat-divider></mat-divider>
+  <div class="actions" align="end" mat-dialog-actions>
+    <button mat-stroked-button mat-dialog-close>Annuler</button>
+    <button
+      mat-flat-button
+      mat-dialog-close
+      color="primary"
+      [disabled]="purchaseForm.invalid || isDisabledBtn"
+      (click)="onSubmit()"
+    >
+      Enregistrer
+    </button>
+  </div>
+</form>

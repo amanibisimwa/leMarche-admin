@@ -148,6 +148,7 @@ export class HeaderTableActionComponent {
     this.dialog.open(this.dialogComponent, {
       hasBackdrop: true,
       disableClose: true,
+      autoFocus: false,
     });
   }
 

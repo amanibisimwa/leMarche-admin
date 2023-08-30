@@ -31,7 +31,6 @@ import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service'
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
-import { DeleteAlertDialogComponent } from 'src/app/components/shared/components/delete-alert-dialog.component';
 import { NewArchiveComponent } from '../archive/new-archive.component';
 import { itemCol } from 'src/app/core/services/firebase/_firestore.collection';
 
@@ -73,10 +72,10 @@ export default class StockComponent {
     'position',
     'title',
     'quantity',
-    'purchasePrice',
-    'purchaseTotalPrice',
     'sellingPrice',
     'sellingTotalPrice',
+    'profit',
+    'totalProfit',
     'action',
   ];
 
@@ -108,18 +107,18 @@ export default class StockComponent {
       });
   }
 
-  purchaseTotalSum() {
-    const totalPurchasePrices = this.dataSource.filteredData.map(
-      (item) => item.purchasePrice * item.quantity
-    );
-    return totalPurchasePrices.reduce((acc, value) => acc + value, 0);
-  }
-
   sellingTotalSum() {
     const totalSellingPrices = this.dataSource.filteredData.map(
       (item) => item.sellingPrice * item.quantity
     );
     return totalSellingPrices.reduce((acc, value) => acc + value, 0);
+  }
+
+  profitTotalSum() {
+    const totalProfit = this.dataSource.filteredData.map(
+      (item) => (item.sellingPrice - item.purchasePrice) * item.quantity
+    );
+    return totalProfit.reduce((acc, value) => acc + value, 0);
   }
 
   onUpdateItem(item: Item) {

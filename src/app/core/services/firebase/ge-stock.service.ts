@@ -13,10 +13,15 @@ import {
   setDoc,
   where,
 } from '@angular/fire/firestore';
-import { archiveCol, categoryCol, itemCol } from './_firestore.collection';
+import {
+  archiveCol,
+  categoryCol,
+  itemCol,
+  purchaseCol,
+} from './_firestore.collection';
 import { Item } from '../../models/item.model';
-import { Observable, map } from 'rxjs';
 import { Archieve } from '../../models/archive.model';
+import { Purchase } from '../../models/purchase.model';
 
 @Injectable({
   providedIn: 'root',
@@ -24,21 +29,22 @@ import { Archieve } from '../../models/archive.model';
 export class GeStockService {
   private fs: Firestore = inject(Firestore);
 
-  //Generate local Document Id
+  //Générer un identifiant de document en local
   docId = (colName: string) => doc(collection(this.fs, colName)).id;
 
-  //Set or Add docs
+  //Creation ou modification d'un document
   setItem = (i: Item) => setDoc(doc(this.fs, itemCol, i.id), i);
   setArchive = (a: Archieve) => setDoc(doc(this.fs, archiveCol, a.id!), a);
+  setPurchase = (p: Purchase) => setDoc(doc(this.fs, purchaseCol, p.id!), p);
 
-  //Get data from firestore
+  //Récupérer des données depuis une collection dans Firestore
   getCollectionData(colName: string) {
     const collectionRef = collection(this.fs, colName);
     const queryDocsByDate = query(collectionRef, orderBy('created', 'desc'));
     return collectionData(queryDocsByDate);
   }
 
-  //Query by Date ranges
+  //Requête par plages de dates
   queryByDateRange(start: Date, end: Date, colName: string) {
     const queryDoc = query(
       collection(this.fs, colName),
@@ -49,6 +55,9 @@ export class GeStockService {
     return collectionData(queryDoc);
   }
 
-  //delete docs
-  deleteItem = (itemId: string) => deleteDoc(doc(this.fs, itemCol, itemId));
+  //supprimer un document
+  deleteDocData(collectionName: string, docId: string) {
+    const docRef = doc(this.fs, collectionName, docId);
+    deleteDoc(docRef);
+  }
 }

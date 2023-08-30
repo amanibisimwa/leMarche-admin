@@ -17,7 +17,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
-import { archiveCol } from 'src/app/core/services/firebase/_firestore.collection';
+import {
+  archiveCol,
+  itemCol,
+} from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-new-archive',
@@ -78,7 +81,7 @@ import { archiveCol } from 'src/app/core/services/firebase/_firestore.collection
           mat-flat-button
           mat-dialog-close
           color="primary"
-          [disabled]="archiveForm.invalid"
+          [disabled]="archiveForm.invalid || isDisabledBtn"
           (click)="onSubmit()"
         >
           Déstocker
@@ -93,6 +96,7 @@ import { archiveCol } from 'src/app/core/services/firebase/_firestore.collection
   ],
 })
 export class NewArchiveComponent {
+  isDisabledBtn = false;
   private gs = inject(GeStockService);
   private snackBar = inject(MatSnackBar);
   readonly item = inject(MAT_DIALOG_DATA);
@@ -106,6 +110,7 @@ export class NewArchiveComponent {
   });
 
   onSubmit() {
+    this.isDisabledBtn = true;
     const archiveDocID = this.gs.docId(archiveCol);
     const formValue = this.archiveForm.value;
 
@@ -124,7 +129,7 @@ export class NewArchiveComponent {
       this.snackBar.open(`Déstocké avec succès`, 'OK', { duration: 10000 });
     } else if (archieve.quantity === archieve.item.quantity) {
       this.gs.setArchive(archieve);
-      this.gs.deleteItem(this.item.id!);
+      this.gs.deleteDocData(itemCol, this.item.id!);
       this.snackBar.open(`Tout a été déstocké avec succès`, 'OK', {
         duration: 10000,
       });

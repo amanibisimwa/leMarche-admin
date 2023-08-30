@@ -49,13 +49,14 @@ export default class GeStockComponent {
       url: 'sell',
     },
     {
-      name: 'Stock',
-      url: 'stock',
-    },
-    {
       name: 'Aprovisionnement',
       url: 'purcharse',
     },
+    {
+      name: 'Stock',
+      url: 'stock',
+    },
+
     {
       name: 'Archive',
       url: 'archive',
