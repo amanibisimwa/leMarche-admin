@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -80,10 +80,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   ],
 })
 export class ImagePickerComponent {
-  imagesUrls: string[] = [];
+  @Input({ required: true }) imagesUrls: string[] = [];
   isDisabledBtn = false;
   private ss = inject(StorageService);
   private snackBar = inject(MatSnackBar);
+
+  ngOnInit(): void {}
 
   selectFiles(event: any) {
     if (event.target.files) {

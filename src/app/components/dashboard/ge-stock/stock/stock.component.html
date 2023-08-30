@@ -1,7 +1,332 @@
 <main>
   <app-header-table-action
     btnLabel="Nouvel item"
-    searchPlaceholder="Rechercher par nom, numèro et date du matos dans le stock"
-    [dialogComponent]="dialogComponent"
+    searchPlaceholder="Rechercher par nom, numèro et date de l'article dans le stock"
+    [dialogComponent]="newItemComponent"
+    [tableDataSource]="dataSource"
+    [collectionName]="itemCollection"
   />
+
+  <div class="table-container mat-elevation-z1">
+    <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
+      <ng-container matColumnDef="position">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          N°
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ dataSource.filteredData.indexOf(item) + 1 }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          Total
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          Nom de l'article
+        </th>
+        <td mat-cell *matCellDef="let item" class="truncate-cell">
+          {{ item.title }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantity">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          Quantité
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          {{ item.quantity | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="purchasePrice">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          Prix d'achat
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          {{ item.purchasePrice | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="purchaseTotalPrice">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          PA Total
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ item.purchasePrice * item.quantity | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ purchaseTotalSum() | number }}$
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="sellingPrice">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>PV</th>
+        <td mat-cell *matCellDef="let item">
+          {{ item.sellingPrice | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="sellingTotalPrice">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          PV Total
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ item.sellingPrice * item.quantity | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ sellingTotalSum() | number }}$
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let item">
+          <button
+            mat-icon-button
+            matTooltip="Modifier"
+            (click)="onUpdateItem(item)"
+          >
+            <mat-icon>mode_edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            matTooltip="Déstocker"
+            (click)="onArchiveItem(item)"
+          >
+            <mat-icon>logout</mat-icon>
+          </button>
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="expandedDetail">
+        <td
+          mat-cell
+          *matCellDef="let item"
+          [attr.colspan]="displayedColumns.length"
+        >
+          <div
+            class="item-detail"
+            [@detailExpand]="item === expandedItem ? 'expanded' : 'collapsed'"
+          >
+            <div class="item-container">
+              <h1>Autres détails de l'article</h1>
+              <mat-divider></mat-divider>
+              <div class="text-img-container">
+                <div class="text-container" style="margin-top: 1rem">
+                  <p>
+                    code de l'article: <b> {{ item.id }} </b>
+                  </p>
+                  <p>
+                    Nom de l'article: <b> {{ item.title }} </b>
+                  </p>
+                  <p>
+                    Unité de mésure: <b> {{ item.unit }} </b>
+                  </p>
+                  <p>
+                    Quantité :
+                    <b> {{ item.quantity | number }} {{ item.unit }}(s) </b>
+                  </p>
+                  <p>
+                    Prix d'achat unitaire :
+                    <b> {{ item.purchasePrice | number }} $</b>
+                  </p>
+                  <p>
+                    Prix d'achat total:
+                    <b> {{ item.purchasePrice * item.quantity | number }} $</b>
+                  </p>
+                  <p>
+                    Prix de vente:
+                    <b> {{ item.sellingPrice | number }} $</b>
+                  </p>
+                  <p>
+                    Prix de vente total:
+                    <b> {{ item.sellingPrice * item.quantity | number }} $</b>
+                  </p>
+                  <p>
+                    Stock de sécurité : <b> {{ item.satetyStock }}</b>
+                  </p>
+                  <p>
+                    Date d'ajout :
+                    <b> {{ formatedDate(item.created) }}</b>
+                  </p>
+                  <p>
+                    Déscription de l'article: <b> {{ item.description }} </b>
+                  </p>
+                </div>
+                <div class="img-container">
+                  <img
+                    *ngFor="let imgUrl of item.imgUrls"
+                    [ngSrc]="imgUrl"
+                    [alt]="item.title"
+                    height="150"
+                    width="150"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Define columns and rows. -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+
+      <tr
+        mat-row
+        *matRowDef="let item; columns: displayedColumns"
+        class="item-row"
+        [class.expanded-row]="expandedItem === item"
+        (click)="expandedItem = expandedItem === item ? null : item"
+      ></tr>
+
+      <tr
+        mat-row
+        *matRowDef="let item; columns: ['expandedDetail']"
+        class="detail-row"
+      ></tr>
+
+      <!-- Table footer. -->
+      <tr
+        mat-footer-row
+        *matFooterRowDef="displayedColumns"
+        class="mat-footer-row"
+      ></tr>
+
+      <!-- Row shown when there is no matching data. -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell mat-no-data-row" colspan="8" align="center">
+          Pas des données correpondantes
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator
+      [pageSizeOptions]="[10, 25, 100]"
+      aria-label="Sélectionnez la page des items"
+      showFirstLastButtons
+    ></mat-paginator>
+  </div>
 </main>

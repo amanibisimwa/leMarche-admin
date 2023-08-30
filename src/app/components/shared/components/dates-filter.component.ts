@@ -6,13 +6,21 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { UtilityService } from 'src/app/core/services/utility.service';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import {
+  DateAdapter,
+  MAT_DATE_LOCALE,
+  MatNativeDateModule,
+} from '@angular/material/core';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { UtilityService } from 'src/app/core/services/utilities/utility.service';
+import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dates-filter',
@@ -25,94 +33,92 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatDialogModule,
+    MatButtonModule,
     ReactiveFormsModule,
   ],
+  providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' }],
   template: `
-    <div class="header" mat-dialog-title fxLayoutAlign="space-between start">
-      <div>
-        <h2>Filtrer par 2 dates</h2>
-        <h3>
-          Entrez 2 dates tout en séléctionnant la date debut et la date fin
-        </h3>
-      </div>
-      <button mat-icon-button matTooltip="Fermez" mat-dialog-close>
-        <mat-icon>close</mat-icon>
+    <h1 mat-dialog-title>Sélectionnez un interval pour votre filtre</h1>
+    <mat-divider></mat-divider>
+
+    <mat-form-field mat-dialog-content appearance="outline">
+      <mat-label>Entrez une plage de dates</mat-label>
+      <mat-date-range-input [formGroup]="dateRangeForm" [rangePicker]="picker">
+        <input
+          matStartDate
+          formControlName="start"
+          placeholder="Date de début"
+        />
+        <input matEndDate formControlName="end" placeholder="Date de fin" />
+      </mat-date-range-input>
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="picker"
+      ></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+      <mat-error *ngIf="dateRangeForm.controls.start.hasError('required')"
+        >Séléctionnez une date de début</mat-error
+      >
+      <mat-error *ngIf="dateRangeForm.controls.end.hasError('required')"
+        >Séléctionnez une date de fin</mat-error
+      >
+      <mat-error
+        *ngIf="
+          !dateRangeForm.controls.end.hasError('required') &&
+          dateRangeForm.controls.start.hasError('matStartDateInvalid')
+        "
+        >Date de début invalide</mat-error
+      >
+      <mat-error
+        *ngIf="
+          !dateRangeForm.controls.end.hasError('required') &&
+          dateRangeForm.controls.end.hasError('matEndDateInvalid')
+        "
+        >Date de fin invalide</mat-error
+      >
+    </mat-form-field>
+
+    <mat-divider></mat-divider>
+    <div mat-dialog-actions align="end">
+      <button mat-stroked-button mat-dialog-close>Annuler</button>
+      <button
+        mat-flat-button
+        mat-dialog-close
+        color="primary"
+        [disabled]="dateRangeForm.invalid || isDisabledBtn"
+        (click)="onSubmit()"
+      >
+        Appliquer
       </button>
     </div>
-    <mat-divider></mat-divider>
-    <form
-      [formGroup]="dateFilterForm"
-      fxLayout="column"
-      (ngSubmit)="onSubmit()"
-    >
-      <mat-form-field appearance="outline" fxFill>
-        <mat-label>Date début</mat-label>
-        <input matInput [matDatepicker]="pickerA" formControlName="startDate" />
-        <mat-datepicker-toggle
-          matSuffix
-          [for]="pickerA"
-        ></mat-datepicker-toggle>
-        <mat-datepicker #pickerA></mat-datepicker>
-        <mat-error *ngIf="dateFilterForm?.hasError('required')"
-          >Date début svp!</mat-error
-        >
-      </mat-form-field>
-      <mat-form-field appearance="outline" fxFill>
-        <mat-label>Date fin</mat-label>
-        <input matInput [matDatepicker]="pickerB" formControlName="endDate" />
-        <mat-datepicker-toggle
-          matSuffix
-          [for]="pickerB"
-        ></mat-datepicker-toggle>
-        <mat-datepicker #pickerB></mat-datepicker>
-        <mat-error *ngIf="dateFilterForm?.hasError('required')"
-          >Date fin svp!</mat-error
-        >
-      </mat-form-field>
-      <div class="actions" fxFlexAlign="end">
-        <button
-          mat-flat-button
-          mat-dialog-close
-          color="primary"
-          [disabled]="dateFilterForm.invalid || isDisabledBtn"
-          type="submit"
-        >
-          Filtrer
-        </button>
-      </div>
-    </form>
   `,
-  styles: [
-    `
-      form,
-      button {
-        margin-top: 1rem;
-      }
-
-      h2,
-      h3 {
-        margin-bottom: 0rem;
-      }
-
-      mat-checkbox {
-        margin-bottom: 1rem;
-      }
-    `,
-  ],
+  styles: [],
 })
 export class DatesFilterComponent {
   isDisabledBtn = false;
-  private uts = inject(UtilityService);
+  subscription!: Subscription;
+  private dateAdapter = inject(DateAdapter<Date>);
+  private dialogData = inject(MAT_DIALOG_DATA);
+  private gs = inject(GeStockService);
 
-  dateFilterForm = new FormGroup({
-    startDate: new FormControl(null, [Validators.required]),
-    endDate: new FormControl(null, [Validators.required]),
+  ngOnInit(): void {
+    this.dateAdapter.setLocale('fr');
+  }
+
+  dateRangeForm = new FormGroup({
+    start: new FormControl<Date | null>(null, [Validators.required]),
+    end: new FormControl<Date | null>(null, [Validators.required]),
   });
 
   onSubmit() {
     this.isDisabledBtn = true;
-    const startDate = this.dateFilterForm.value.startDate!;
-    const endDate = this.dateFilterForm.value.endDate!;
-    this.uts.dateFilter(startDate, endDate);
+    const formValue = this.dateRangeForm.value;
+    const colName = this.dialogData.collectionName;
+    this.subscription = this.gs
+      .queryByDateRange(formValue.start!, formValue.end!, colName)
+      .subscribe((items) => {
+        this.dialogData.tableDataSource.data = items;
+      });
   }
 }

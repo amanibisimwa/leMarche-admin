@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,9 +22,13 @@ import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service'
 import { StorageService } from 'src/app/core/services/firebase/storage.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { FormFieldValidatorService } from 'src/app/core/services/firebase/form-field-validator.service';
-import { itemCol } from 'src/app/core/services/firebase/_firestore.collection';
+import {
+  categoryCol,
+  itemCol,
+} from 'src/app/core/services/firebase/_firestore.collection';
 import { Item } from 'src/app/core/models/item.model';
 import { serverTimestamp } from '@angular/fire/firestore';
+import { Category } from 'src/app/core/models/shop.category.model';
 
 @Component({
   selector: 'app-new-item',
@@ -57,18 +61,30 @@ export class NewItemComponent {
   private snackBar = inject(MatSnackBar);
   private ffvs = inject(FormFieldValidatorService);
   imageUrls = this.ss.imageUrls;
-  categories$ = this.gs.getCategories;
+  categories$ = this.gs.getCollectionData(categoryCol);
   isOnline = this.uts.isOnline();
 
+  readonly item: Item = inject(MAT_DIALOG_DATA);
+
+  ngOnInit(): void {
+    if (this.item) {
+      this.ss.imageUrls.set(this.item.imgUrls);
+      this.addItemForm.patchValue(this.item as any);
+    }
+  }
+
   addItemForm = new FormGroup({
-    id: new FormControl(
-      '',
-      [Validators.required],
-      [this.ffvs.alreadyExistInputValidator(itemCol, 'id', false)]
-    ),
+    id: this.item
+      ? new FormControl('')
+      : new FormControl(
+          '',
+          [Validators.required],
+          [this.ffvs.alreadyExistInputValidator(itemCol, 'id', false)]
+        ),
     title: new FormControl('', [Validators.required]),
     description: new FormControl('', [Validators.required]),
-    category: new FormControl('', [Validators.required]),
+    category: new FormControl<Category | null>(null, [Validators.required]),
+    unit: new FormControl('', [Validators.required]),
     purchasePrice: new FormControl(null, [
       Validators.required,
       Validators.pattern(/^[.\d]+$/),
@@ -88,45 +104,21 @@ export class NewItemComponent {
     ]),
   });
 
-  get id() {
-    return this.addItemForm.get('id');
-  }
-  get title() {
-    return this.addItemForm.get('title');
-  }
-  get description() {
-    return this.addItemForm.get('description');
-  }
-  get category() {
-    return this.addItemForm.get('category');
-  }
-  get purchasePrice() {
-    return this.addItemForm.get('purchasePrice');
-  }
-  get sellingPrice() {
-    return this.addItemForm.get('sellingPrice');
-  }
-  get discountPrice() {
-    return this.addItemForm.get('discountPrice');
-  }
-  get quantity() {
-    return this.addItemForm.get('quantity');
-  }
-  get satetyStock() {
-    return this.addItemForm.get('satetyStock');
-  }
-
   onSubmit() {
+    const formValue = this.addItemForm.value;
+    const itemDocId = this.uts.toPascalCase(formValue.id!);
+
     const item: Item = {
-      id: this.id?.value!,
-      title: this.title?.value!,
-      description: this.description?.value!,
-      category: this.category?.value!,
-      purchasePrice: Number(this.purchasePrice?.value!),
-      sellingPrice: Number(this.sellingPrice?.value!),
-      discountPrice: Number(this.discountPrice?.value!),
-      quantity: Number(this.quantity?.value!),
-      satetyStock: Number(this.satetyStock?.value!),
+      id: itemDocId,
+      title: formValue.title!,
+      description: formValue.description!,
+      category: formValue.category!,
+      unit: formValue.unit!,
+      purchasePrice: Number(formValue.purchasePrice!),
+      sellingPrice: Number(formValue.sellingPrice!),
+      discountPrice: Number(formValue.discountPrice!),
+      quantity: Number(formValue.quantity!),
+      satetyStock: Number(formValue.satetyStock!),
       imgUrls: this.imageUrls(),
       created: serverTimestamp(),
     };

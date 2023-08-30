@@ -1,14 +1,5 @@
-.fied-in-row {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
+@use "../../../../shared/styles/dialog-form.style" as *;
 
-  & > * {
-    width: 49%;
-    min-width: 13rem;
-  }
-}
-
-.description-field {
-  width: 100%;
+.margin-top {
+  margin-top: 1rem;
 }

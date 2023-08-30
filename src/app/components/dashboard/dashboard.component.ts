@@ -30,7 +30,7 @@ import { appTitle } from 'src/app/app.config';
     NgOptimizedImage,
   ],
   template: `<div class="dashboard-container">
-    <mat-toolbar class="overwrite-toolbar-background-color">
+    <mat-toolbar>
       <div class="left-container">
         <button
           *ngIf="
@@ -44,25 +44,21 @@ import { appTitle } from 'src/app/app.config';
         >
           <mat-icon>menu</mat-icon>
         </button>
-        <a routerLink="" mat-button
+        <a mat-button href="/ge-stock"
           ><h1>{{ appName }}</h1></a
         >
       </div>
-      <div class="img-profil">
-        <img
-          [matTooltip]="'Menu de ' + appName"
-          [matMenuTriggerFor]="menu"
-          width="40"
-          height="40"
-          [ngSrc]="
-            user?.photoURL ??
-            'https://images.vexels.com/content/145908/preview/male-avatar-maker-2a7919.png'
-          "
-          alt="Image de profile"
-          ngSrcset="100w, 200w, 300w"
-          sizes="50vw"
-        />
-      </div>
+      <img
+        [matTooltip]="'Menu de ' + appName"
+        [matMenuTriggerFor]="menu"
+        width="35"
+        height="35"
+        [ngSrc]="
+          user?.photoURL ??
+          'https://images.vexels.com/content/145908/preview/male-avatar-maker-2a7919.png'
+        "
+        alt="Image de profile LeMarché admin"
+      />
 
       <mat-menu #menu="matMenu">
         <button mat-menu-item>
@@ -108,43 +104,46 @@ import { appTitle } from 'src/app/app.config';
         <a
           class="link"
           routerLink="ge-stock"
-          routerLinkActive="active-menu-link"
-          mat-button
+          mat-fab
+          extended
+          routerLinkActive="active"
+          #rla="routerLinkActive"
+          [color]="rla.isActive ? 'primary' : 'no-color'"
           *ngIf="viewPoint$ | async as vw"
           (click)="toggleDrawer(drawer, vw)"
         >
-          <div class="item-menu">
-            <mat-icon>inventory_2</mat-icon>
-            <div>GeStock</div>
-          </div>
+          <mat-icon>inventory_2</mat-icon>
+          GeStock
         </a>
 
         <a
           class="link"
           routerLink="finance"
-          routerLinkActive="active-menu-link"
-          mat-button
+          mat-fab
+          extended
+          routerLinkActive="active"
+          #rla="routerLinkActive"
+          [color]="rla.isActive ? 'primary' : 'no-color'"
           *ngIf="viewPoint$ | async as vw"
           (click)="toggleDrawer(drawer, vw)"
         >
-          <div class="item-menu">
-            <mat-icon>attach_money</mat-icon>
-            <div>Finance</div>
-          </div>
+          <mat-icon>attach_money</mat-icon>
+          Finance
         </a>
 
         <a
           class="link"
           routerLink="setting"
-          routerLinkActive="active-menu-link"
-          mat-button
+          mat-fab
+          extended
+          routerLinkActive="active"
+          #rla="routerLinkActive"
+          [color]="rla.isActive ? 'primary' : 'no-color'"
           *ngIf="viewPoint$ | async as vw"
           (click)="toggleDrawer(drawer, vw)"
         >
-          <div class="item-menu">
-            <mat-icon>settings</mat-icon>
-            <div>Paramètres</div>
-          </div>
+          <mat-icon>settings</mat-icon>
+          Paramètres
         </a>
       </mat-drawer>
 
@@ -159,10 +158,6 @@ import { appTitle } from 'src/app/app.config';
         height: 100vh;
         display: flex;
         flex-direction: column;
-      }
-
-      .active-menu-link {
-        background: #c12765;
       }
 
       .toolbar-container {
@@ -185,7 +180,6 @@ import { appTitle } from 'src/app/app.config';
       img {
         border-radius: 50%;
         background: lightgray;
-        margin-left: 1rem;
         cursor: pointer;
         transition: 250ms;
 
@@ -208,18 +202,8 @@ import { appTitle } from 'src/app/app.config';
         border-radius: 0;
         margin-bottom: 0.2rem;
         display: flex;
-        align-items: center;
         justify-content: flex-start;
-      }
-
-      .item-menu {
-        margin-left: 1.2rem;
-        display: flex;
-        align-items: center;
-
-        mat-icon {
-          margin-right: 1rem;
-        }
+        box-shadow: none;
       }
     `,
   ],
@@ -229,8 +213,8 @@ export default class DashboardComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   user = this.authService.user;
-  private sts = inject(SwitchThemeService);
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
+  private sts = inject(SwitchThemeService);
 
   toggleDrawer(drawer: MatDrawer, viewPoint: string) {
     if (viewPoint === 'Large' || viewPoint === 'XLarge') {

@@ -1,67 +1,86 @@
 <form [formGroup]="addItemForm">
-  <h1 mat-dialog-title>Ajouter un article dans le stock</h1>
+  <h1 mat-dialog-title>
+    {{
+      item
+        ? "Modifier cet article dans le stock"
+        : "Ajouter un article dans le stock"
+    }}
+  </h1>
   <mat-divider />
   <div class="dilog-content" mat-dialog-content>
     <mat-stepper orientation="vertical" linear #stepper>
       <mat-step
-        [completed]="imageUrls().length > 1"
+        [completed]="imageUrls().length !== 0 || item !== null"
         label="Uploader les images de l'article"
       >
-        <app-image-picker *ngIf="isOnline | async" />
+        <app-image-picker
+          [imagesUrls]="item ? item.imgUrls : []"
+          *ngIf="isOnline | async"
+        />
         <p *ngIf="!(isOnline | async)" align="center">
           Veuillez vous connecter sur internet pour ajouter les images
         </p>
-        <div class="actions" align="end" *ngIf="imageUrls().length > 1">
+        <div
+          class="actions"
+          align="end"
+          *ngIf="imageUrls().length !== 0 || item"
+        >
           <button mat-flat-button matStepperNext color="primary">
             Suivant
           </button>
         </div>
       </mat-step>
       <mat-step [stepControl]="addItemForm" label="Les informations du matos"
-        ><div class="fied-in-row">
-          <mat-form-field appearance="outline">
+        ><div class="fied-in-row margin-top">
+          <mat-form-field appearance="outline" *ngIf="!item">
             <mat-label>Identifiant</mat-label>
             <input matInput placeholder="Ex: Item000457" formControlName="id" />
             <mat-spinner
               matSuffix
               strokeWidth="2"
               diameter="20"
-              *ngIf="id?.pending"
+              *ngIf="addItemForm.controls.id.pending"
             ></mat-spinner>
             <mat-error
               *ngIf="
-                id?.errors?.['alreadyExist'] &&
-              !id?.errors?.['required']
-            "
+                addItemForm.controls.id.hasError('alreadyExist') &&
+                !addItemForm.controls.id.hasError('required')
+              "
             >
               Ce code est déjà attribué
             </mat-error>
-            <mat-error *ngIf="id?.errors?.['required']"
+            <mat-error *ngIf="addItemForm.controls.id.hasError('required')"
               >le code est obligatoire</mat-error
             >
           </mat-form-field>
-          <mat-form-field appearance="outline">
+
+          <mat-form-field appearance="outline" [class.width-full]="item">
             <mat-label>Nom de l'article</mat-label>
             <input
               matInput
               placeholder="Ex: Dell Latitude E7270"
               formControlName="title"
+              #input
+              maxlength="25"
             />
-            <mat-error *ngIf="title?.errors?.['required']">
+            <mat-hint align="end">{{ input.value.length || 0 }}/25</mat-hint>
+            <mat-error *ngIf="addItemForm.controls.title.hasError('required')">
               Le nom de l'article
             </mat-error>
           </mat-form-field>
         </div>
 
-        <mat-form-field appearance="outline" class="description-field">
+        <mat-form-field appearance="outline" class="width-full">
           <mat-label>Déscription</mat-label>
           <textarea
             matInput
-            placeholder="Veuillez donner plus d'informations du matos"
+            placeholder="Plus d'informations sur l'article"
             formControlName="description"
           ></textarea>
-          <mat-error *ngIf="description?.errors?.['required']">
-            Détaillez cet article
+          <mat-error
+            *ngIf="addItemForm.controls.description.hasError('required')"
+          >
+            Déscrivez cet article
           </mat-error>
         </mat-form-field>
 
@@ -73,12 +92,15 @@
               placeholder="Ex: 20$"
               formControlName="purchasePrice"
             />
-            <mat-error *ngIf="purchasePrice?.errors?.['required']">
+            <mat-error
+              *ngIf="addItemForm.controls.purchasePrice.hasError('required')"
+            >
               Le prix d'achat svp
             </mat-error>
             <mat-error
               *ngIf="
-              purchasePrice?.errors?.['pattern'] && !purchasePrice?.errors?.['required']
+                addItemForm.controls.purchasePrice.hasError('pattern') &&
+                !addItemForm.controls.purchasePrice.hasError('required')
               "
             >
               Entrez les chiffres
@@ -92,12 +114,15 @@
               placeholder="Ex: 30$"
               formControlName="sellingPrice"
             />
-            <mat-error *ngIf="sellingPrice?.errors?.['required']">
+            <mat-error
+              *ngIf="addItemForm.controls.sellingPrice.hasError('required')"
+            >
               Le prix d'achat svp
             </mat-error>
             <mat-error
               *ngIf="
-                sellingPrice?.errors?.['pattern'] && !sellingPrice?.errors?.['required']
+                addItemForm.controls.sellingPrice.hasError('pattern') &&
+                !addItemForm.controls.sellingPrice.hasError('required')
               "
             >
               Entrez les chiffres
@@ -105,23 +130,21 @@
           </mat-form-field>
         </div>
 
-        <div class="fied-in-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Prix de réduction (Discount)</mat-label>
-            <input
-              matInput
-              placeholder="Ex: 15$"
-              formControlName="discountPrice"
-            />
-            <mat-error
-              *ngIf="
-              discountPrice?.errors?.['pattern']
-              "
-            >
-              Entrez les chiffres
-            </mat-error>
-          </mat-form-field>
+        <mat-form-field appearance="outline" class="width-full">
+          <mat-label>Prix de réduction (Discount)</mat-label>
+          <input
+            matInput
+            placeholder="Ex: 15$"
+            formControlName="discountPrice"
+          />
+          <mat-error
+            *ngIf="addItemForm.controls.discountPrice.hasError('pattern')"
+          >
+            Entrez les chiffres
+          </mat-error>
+        </mat-form-field>
 
+        <div class="fied-in-row">
           <mat-form-field appearance="outline">
             <mat-label>Categorie de l'article</mat-label>
             <mat-select
@@ -135,7 +158,24 @@
                 {{ catergory["title"] }}
               </mat-option>
             </mat-select>
-            <mat-error *ngIf="category?.hasError('required')"
+            <mat-error
+              *ngIf="addItemForm.controls.category.hasError('required')"
+              >Séléctionnez une option</mat-error
+            >
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Unité de mésure</mat-label>
+            <mat-select
+              formControlName="unit"
+              placeholder="Sélectionnez une unité de mèsure"
+            >
+              <mat-option value="Piece"> Piece </mat-option>
+              <mat-option value="Mètre"> Mètre </mat-option>
+              <mat-option value="Litre"> Litre </mat-option>
+              <mat-option value="Kg"> Kilogramme </mat-option>
+            </mat-select>
+            <mat-error *ngIf="addItemForm.controls.unit.hasError('required')"
               >Séléctionnez une option</mat-error
             >
           </mat-form-field>
@@ -144,27 +184,34 @@
         <div class="fied-in-row">
           <mat-form-field appearance="outline">
             <mat-label>Quantité</mat-label>
-            <input matInput placeholder="Ex: 5" formControlName="quantity" />
-            <mat-error *ngIf="quantity?.errors?.['required']">
+            <input matInput placeholder="Ex: 50" formControlName="quantity" />
+            <mat-error
+              *ngIf="addItemForm.controls.quantity.hasError('required')"
+            >
               Un nombre d'article svp !
             </mat-error>
             <mat-error
               *ngIf="
-              quantity?.errors?.['pattern'] && !quantity?.errors?.['required']
+                addItemForm.controls.quantity.hasError('pattern') &&
+                !addItemForm.controls.quantity.hasError('required')
               "
             >
               Entrez les chiffres
             </mat-error>
           </mat-form-field>
+
           <mat-form-field appearance="outline">
             <mat-label>Stock de sécurité</mat-label>
             <input matInput placeholder="Ex: 1" formControlName="satetyStock" />
-            <mat-error *ngIf="satetyStock?.errors?.['required']">
+            <mat-error
+              *ngIf="addItemForm.controls.satetyStock.hasError('required')"
+            >
               Le stock de sécurité Svp
             </mat-error>
             <mat-error
               *ngIf="
-              satetyStock?.errors?.['pattern'] && !satetyStock?.errors?.['required']
+                addItemForm.controls.satetyStock.hasError('pattern') &&
+                !addItemForm.controls.satetyStock.hasError('required')
               "
             >
               Entrez les chiffres
@@ -181,7 +228,9 @@
       mat-flat-button
       mat-dialog-close
       color="primary"
-      [disabled]="addItemForm.invalid || id?.pending || isDisabledBtn"
+      [disabled]="
+        addItemForm.invalid || addItemForm.controls.id.pending || isDisabledBtn
+      "
       (click)="onSubmit()"
     >
       Enregistrer

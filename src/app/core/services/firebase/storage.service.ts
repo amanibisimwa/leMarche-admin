@@ -10,7 +10,7 @@ import {
   providedIn: 'root',
 })
 export class StorageService {
-  imageUrls = signal(['']);
+  imageUrls = signal<any>([]);
   private storage = inject(Storage);
 
   //changerment de l'image vers Cloud Storage

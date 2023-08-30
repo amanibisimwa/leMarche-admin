@@ -14,17 +14,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription } from 'rxjs';
-import { ImageCroperDialogComponent } from './image-croper-dialog.component';
+import { ImageCroperDialogComponent } from '../shared/components/image-croper-dialog.component';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Shop } from 'src/app/core/models/shop.model';
 import { serverTimestamp } from '@angular/fire/firestore';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { AuthService } from 'src/app/core/services/firebase/auth.service';
 import { ShopService } from 'src/app/core/services/firebase/shop.service';
 import { FormFieldValidatorService } from 'src/app/core/services/firebase/form-field-validator.service';
 import { shopCol } from 'src/app/core/services/firebase/_firestore.collection';
-import { base64ToFile } from 'ngx-image-cropper';
-import { StorageService } from 'src/app/core/services/firebase/storage.service';
 
 @Component({
   selector: 'app-shop-register',
@@ -72,7 +69,10 @@ import { StorageService } from 'src/app/core/services/firebase/storage.service';
               matInput
               placeholder="Ex: Computer Business"
               formControlName="name"
+              #input
+              maxlength="25"
             />
+            <mat-hint align="end">{{ input.value.length || 0 }}/25</mat-hint>
             <mat-spinner
               matSuffix
               strokeWidth="2"

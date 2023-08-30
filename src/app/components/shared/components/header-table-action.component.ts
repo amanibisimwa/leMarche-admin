@@ -8,6 +8,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { ComponentType } from '@angular/cdk/portal';
+import {
+  MatTableDataSource,
+  MatTableDataSourcePaginator,
+} from '@angular/material/table';
+import { DatesFilterComponent } from './dates-filter.component';
+import { RouterLink } from '@angular/router';
+import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 
 @Component({
   selector: 'app-header-table-action',
@@ -20,11 +27,17 @@ import { ComponentType } from '@angular/cdk/portal';
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
+    RouterLink,
   ],
   template: `
     <main>
       <mat-form-field class="search-input" appearance="outline">
-        <input matInput [placeholder]="searchPlaceholder" #input />
+        <input
+          matInput
+          [placeholder]="searchPlaceholder"
+          (keyup)="applyFilter($event)"
+          #input
+        />
         <mat-icon matPrefix>search</mat-icon>
       </mat-form-field>
       <div class="actions">
@@ -32,13 +45,15 @@ import { ComponentType } from '@angular/cdk/portal';
           Filtrer
         </button>
         <mat-menu #menu="matMenu">
-          <button mat-menu-item>Intervale de dates</button>
-          <button mat-menu-item>Annuler le filtre</button>
+          <button mat-menu-item (click)="openDateRangeFilterDialog()">
+            Intervale de dates
+          </button>
+          <a mat-menu-item (click)="clearFilter()"> Annuler le filtre </a>
         </mat-menu>
         <button
           mat-flat-button
           color="primary"
-          (click)="openDialog()"
+          (click)="openAddItemDialog()"
           *ngIf="
             (viewPoint$ | async) === 'XLarge' ||
             (viewPoint$ | async) === 'Large' ||
@@ -50,7 +65,7 @@ import { ComponentType } from '@angular/cdk/portal';
         <button
           mat-mini-fab
           color="primary"
-          (click)="openDialog()"
+          (click)="openAddItemDialog()"
           *ngIf="
             (viewPoint$ | async) === 'XSmall' ||
             (viewPoint$ | async) === 'Small'
@@ -87,6 +102,8 @@ import { ComponentType } from '@angular/cdk/portal';
       }
 
       .mat-mdc-form-field {
+        font-weight: 300;
+
         ::ng-deep {
           .mat-mdc-form-field-infix,
           .mat-mdc-form-field-flex {
@@ -116,15 +133,43 @@ import { ComponentType } from '@angular/cdk/portal';
 export class HeaderTableActionComponent {
   @Input({ required: true }) btnLabel!: string;
   @Input({ required: true }) searchPlaceholder!: string;
+  @Input({ required: true }) collectionName!: string;
   @Input({ required: true }) dialogComponent!: ComponentType<unknown>;
+  @Input({ required: true }) tableDataSource!: MatTableDataSource<
+    any,
+    MatTableDataSourcePaginator
+  >;
+
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
   private dialog = inject(MatDialog);
+  private us = inject(UtilityService);
 
-  openDialog() {
+  openAddItemDialog() {
     this.dialog.open(this.dialogComponent, {
-      width: '35rem',
       hasBackdrop: true,
       disableClose: true,
     });
   }
+
+  openDateRangeFilterDialog() {
+    this.dialog.open(DatesFilterComponent, {
+      hasBackdrop: true,
+      disableClose: true,
+      data: {
+        tableDataSource: this.tableDataSource,
+        collectionName: this.collectionName,
+      },
+    });
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.tableDataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.tableDataSource.paginator) {
+      this.tableDataSource.paginator.firstPage();
+    }
+  }
+
+  clearFilter = () => this.us.navigateOnTheSameUrl('/ge-stock/stock');
 }

@@ -1,12 +1,22 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-ge-stock',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatTabsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatTabsModule,
+    MatDividerModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
+  ],
   template: `<main class="children-container">
     <nav
       mat-tab-nav-bar
@@ -25,6 +35,7 @@ import { MatTabsModule } from '@angular/material/tabs';
       </a>
     </nav>
     <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+    <mat-divider></mat-divider>
     <router-outlet></router-outlet>
   </main>`,
   styles: [],
