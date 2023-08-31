@@ -20,13 +20,13 @@ import { MediaQueryObserverService } from 'src/app/core/services/utilities/media
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { HeaderTableActionComponent } from '../../../shared/components/header-table-action.component';
-import { DeleteAlertDialogComponent } from 'src/app/components/shared/components/delete-alert-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { DeletePurchaseComponent } from './delete-purchase.component';
 
 @Component({
   selector: 'app-purchase',
@@ -46,7 +46,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatIconModule,
   ],
   templateUrl: './purchase.component.html',
-  styleUrls: ['./purchase.component.scss'],
+  styles: [
+    `
+      @use '../../../shared/styles/data-table.style' as *;
+    `,
+  ],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({ height: '0px', minHeight: '0' })),
@@ -127,11 +131,11 @@ export default class PurchaseComponent {
   }
 
   onDeletePurchase(purchase: Purchase) {
-    this.dialog.open(DeleteAlertDialogComponent, {
+    this.dialog.open(DeletePurchaseComponent, {
       width: '25rem',
       hasBackdrop: true,
       disableClose: true,
-      data: { collection: purchaseCol, item: purchase },
+      data: purchase,
     });
   }
 

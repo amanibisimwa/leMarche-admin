@@ -36,10 +36,10 @@ export const routes: Routes = [
           import('./components/dashboard/ge-stock/ge-stock.component'),
         children: [
           {
-            path: 'sell',
+            path: 'sale',
             title: `Vente - ${appName}`,
             loadComponent: () =>
-              import('./components/dashboard/ge-stock/sell/sell.component'),
+              import('./components/dashboard/ge-stock/sale/sale.component'),
           },
           {
             path: 'stock',
@@ -63,7 +63,7 @@ export const routes: Routes = [
                 './components/dashboard/ge-stock/archive/archive.component'
               ),
           },
-          { path: '', pathMatch: 'full', redirectTo: 'sell' },
+          { path: '', pathMatch: 'full', redirectTo: 'sale' },
         ],
       },
       {

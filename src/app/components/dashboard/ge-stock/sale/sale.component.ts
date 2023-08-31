@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-sell',
+  selector: 'app-sale',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './sell.component.html',
-  styleUrls: ['./sell.component.scss'],
+  templateUrl: './sale.component.html',
+  styles: [],
 })
-export default class SellComponent {}
+export default class SaleComponent {}

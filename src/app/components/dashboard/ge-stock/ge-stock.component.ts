@@ -46,7 +46,7 @@ export default class GeStockComponent {
   links = [
     {
       name: 'Vente',
-      url: 'sell',
+      url: 'sale',
     },
     {
       name: 'Aprovisionnement',

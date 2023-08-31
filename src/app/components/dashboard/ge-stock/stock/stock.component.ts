@@ -38,7 +38,11 @@ import { itemCol } from 'src/app/core/services/firebase/_firestore.collection';
   selector: 'app-stock',
   standalone: true,
   templateUrl: './stock.component.html',
-  styleUrls: ['./stock.component.scss'],
+  styles: [
+    `
+      @use '../../../shared/styles/data-table.style' as *;
+    `,
+  ],
   animations: [
     trigger('detailExpand', [
       state('collapsed', style({ height: '0px', minHeight: '0' })),

@@ -50,7 +50,15 @@ import { Category } from 'src/app/core/models/shop.category.model';
     MatSelectModule,
   ],
   templateUrl: './new-item.component.html',
-  styleUrls: ['./new-item.component.scss'],
+  styles: [
+    `
+      @use '../../../../shared/styles/dialog-form.style' as *;
+
+      .margin-top {
+        margin-top: 1rem;
+      }
+    `,
+  ],
 })
 export class NewItemComponent {
   isDisabledBtn = false;
@@ -68,7 +76,7 @@ export class NewItemComponent {
   ngOnInit(): void {
     if (this.item) {
       this.ss.imageUrls.set(this.item.imgUrls);
-      this.addItemForm.patchValue(this.item as any);
+      this.addItemForm.patchValue(this.item);
     }
   }
 
@@ -84,20 +92,22 @@ export class NewItemComponent {
     description: new FormControl('', [Validators.required]),
     category: new FormControl<Category | null>(null, [Validators.required]),
     unit: new FormControl('', [Validators.required]),
-    purchasePrice: new FormControl(null, [
+    purchasePrice: new FormControl<number | null>(null, [
       Validators.required,
       Validators.pattern(/^[.\d]+$/),
     ]),
-    sellingPrice: new FormControl(null, [
+    sellingPrice: new FormControl<number | null>(null, [
       Validators.required,
       Validators.pattern(/^[.\d]+$/),
     ]),
-    discountPrice: new FormControl(null, [Validators.pattern(/^[.\d]+$/)]),
-    quantity: new FormControl(null, [
+    discountPrice: new FormControl<number | null>(null, [
+      Validators.pattern(/^[.\d]+$/),
+    ]),
+    quantity: new FormControl<number | null>(null, [
       Validators.required,
       Validators.pattern(/^[.\d]+$/),
     ]),
-    satetyStock: new FormControl(null, [
+    satetyStock: new FormControl<number | null>(null, [
       Validators.required,
       Validators.pattern(/^[.\d]+$/),
     ]),
@@ -105,10 +115,10 @@ export class NewItemComponent {
 
   onSubmit() {
     const formValue = this.addItemForm.value;
-    const itemDocId = this.uts.toPascalCase(formValue.id!);
+    const newItemDocId = this.uts.toPascalCase(formValue.id!);
 
     const item: Item = {
-      id: itemDocId,
+      id: this.item ? this.item.id : newItemDocId,
       title: formValue.title!,
       description: formValue.description!,
       category: formValue.category!,

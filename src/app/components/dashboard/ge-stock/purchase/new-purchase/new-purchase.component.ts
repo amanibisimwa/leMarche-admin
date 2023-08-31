@@ -46,7 +46,11 @@ import { serverTimestamp } from '@angular/fire/firestore';
     MatTooltipModule,
   ],
   templateUrl: './new-purchase.component.html',
-  styleUrls: ['./new-purchase.component.scss'],
+  styles: [
+    `
+      @use '../../../../shared/styles/dialog-form.style' as *;
+    `,
+  ],
 })
 export class NewPurchaseComponent {
   isDisabledBtn = false;
@@ -86,10 +90,9 @@ export class NewPurchaseComponent {
 
     if (this.purchase)
       this.purchaseForm.patchValue({
-        item: this.purchase.item,
         purchasePrice: this.purchase.item.purchasePrice,
         sellingPrice: this.purchase.item.sellingPrice,
-        quantity: this.purchase.quantity!,
+        ...this.purchase,
       });
   }
 
@@ -118,9 +121,7 @@ export class NewPurchaseComponent {
 
   onSubmit() {
     this.isDisabledBtn = true;
-    const purchaseDocID = this.purchase
-      ? this.purchase.id
-      : this.gs.docId(purchaseCol);
+    const purchaseDocID = this.gs.docId(purchaseCol);
     const formValue = this.purchaseForm.value;
 
     const purchase: Purchase = {
@@ -134,11 +135,18 @@ export class NewPurchaseComponent {
       //Modification de l'article en Stock
       purchase.item.purchasePrice = Number(formValue.purchasePrice);
       purchase.item.sellingPrice = Number(formValue.sellingPrice);
-      purchase.item.quantity += purchase.quantity;
       purchase.item.created = purchase.created;
 
       //Enregistrement de modification de l'article
-      //Enregistrement du nouvel approvisionnement
+      //Enregistrement du nouvel approvisionnement ou sa modification
+      if (this.purchase) {
+        purchase.id = this.purchase.id;
+        purchase.item.quantity -= this.purchase.quantity;
+        purchase.item.quantity += purchase.quantity;
+      } else {
+        purchase.item.quantity += purchase.quantity;
+      }
+
       this.gs.setItem(purchase.item);
       this.gs.setPurchase(purchase);
       const notificationMsg = `${purchase.item.title} enregistré avec succès`;
