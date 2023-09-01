@@ -1,7 +1,5 @@
 import { Component, ViewChild, inject } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { NewPurchaseComponent } from './new-purchase/new-purchase.component';
-import { purchaseCol } from 'src/app/core/services/firebase/_firestore.collection';
 import {
   trigger,
   state,
@@ -9,42 +7,45 @@ import {
   transition,
   animate,
 } from '@angular/animations';
-import { MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { HeaderTableActionComponent } from 'src/app/components/shared/components/header-table-action.component';
+import { NewSaleComponent } from './new-sale/new-sale.component';
+import { saleCol } from 'src/app/core/services/firebase/_firestore.collection';
+import { Sale } from 'src/app/core/models/sale.model';
+import { CancelSaleComponent } from './cancel-sale.component';
+import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
-import { Purchase } from 'src/app/core/models/purchase.model';
 import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
 import { MediaQueryObserverService } from 'src/app/core/services/utilities/media-query-observer.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
-import { HeaderTableActionComponent } from '../../../shared/components/header-table-action.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
-  selector: 'app-purchase',
+  selector: 'app-sale',
   standalone: true,
+  templateUrl: './sale.component.html',
   imports: [
     CommonModule,
     MatTableModule,
-    MatTooltipModule,
     MatSortModule,
     MatPaginatorModule,
-    NgOptimizedImage,
+    MatTooltipModule,
     MatDividerModule,
+    NgOptimizedImage,
     HeaderTableActionComponent,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
   ],
-  templateUrl: './purchase.component.html',
   styles: [
     `
       @use '../../../shared/styles/data-table.style' as *;
@@ -61,27 +62,27 @@ import { MatDividerModule } from '@angular/material/divider';
     ]),
   ],
 })
-export default class PurchaseComponent {
-  newPurchaseComponent = NewPurchaseComponent;
-  purchaseCollection = purchaseCol;
+export default class SaleComponent {
+  newSaleComponent = NewSaleComponent;
+  saleCollection = saleCol;
 
   displayedColumns = [
     'position',
     'title',
     'quantity',
-    'purchasePrice',
-    'purchaseTotalPrice',
+    'sellingPrice',
+    'sellingTotalPrice',
     'profit',
     'totalProfit',
     'action',
   ];
 
-  expandedPurchase?: Purchase | null;
+  expandedSale?: Sale | null;
   subscription!: Subscription;
   private gs = inject(GeStockService);
   private us = inject(UtilityService);
   private dialog = inject(MatDialog);
-  dataSource = new MatTableDataSource<Purchase>();
+  dataSource = new MatTableDataSource<Sale>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -91,37 +92,36 @@ export default class PurchaseComponent {
 
   ngOnInit() {
     this.subscription = this.gs
-      .getCollectionData(purchaseCol)
+      .getCollectionData(saleCol)
       .subscribe((docData) => {
-        const purchases = docData as Purchase[];
-        this.dataSource.data = purchases;
+        const sales = docData as Sale[];
+        this.dataSource.data = sales;
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
       });
   }
 
-  purchaseTotalSum() {
-    const totalPurchasePrices = this.dataSource.filteredData.map(
-      (purchase) => purchase.item.purchasePrice * purchase.quantity
+  saleTotalSum() {
+    const totalSalePrices = this.dataSource.filteredData.map(
+      (sale) => sale.item.sellingPrice * sale.quantity
     );
-    return totalPurchasePrices.reduce((acc, value) => acc + value, 0);
+    return totalSalePrices.reduce((acc, value) => acc + value, 0);
   }
 
   profitTotalSum() {
     const totalProfit = this.dataSource.filteredData.map(
-      (purchase) =>
-        (purchase.item.sellingPrice - purchase.item.purchasePrice) *
-        purchase.quantity
+      (sale) =>
+        (sale.item.sellingPrice - sale.item.purchasePrice) * sale.quantity
     );
     return totalProfit.reduce((acc, value) => acc + value, 0);
   }
 
-  onUpdatePurchase(purchase: Purchase) {
-    this.dialog.open(NewPurchaseComponent, {
+  onCancelSale(sale: Sale) {
+    this.dialog.open(CancelSaleComponent, {
+      width: '25rem',
       hasBackdrop: true,
       disableClose: true,
-      autoFocus: false,
-      data: purchase,
+      data: sale,
     });
   }
 

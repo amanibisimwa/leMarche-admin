@@ -1,10 +1,10 @@
 <main>
   <app-header-table-action
-    btnLabel="Nouvel item"
-    searchPlaceholder="Rechercher par nom, numèro et date de l'article dans le stock"
-    [dialogComponent]="newItemComponent"
+    btnLabel="Nouvelle vente"
+    searchPlaceholder="Rechercher par nom, numèro et date de l'article dans l'approvisionnement"
+    [dialogComponent]="newSaleComponent"
     [tableDataSource]="dataSource"
-    [collectionName]="itemCollection"
+    [collectionName]="saleCollection"
   />
 
   <div class="table-container mat-elevation-z1">
@@ -23,13 +23,13 @@
         </th>
         <td
           mat-cell
-          *matCellDef="let item"
+          *matCellDef="let sale"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
           "
         >
-          {{ dataSource.filteredData.indexOf(item) + 1 }}
+          {{ dataSource.filteredData.indexOf(sale) + 1 }}
         </td>
         <td
           mat-footer-cell
@@ -47,8 +47,8 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>
           Nom de l'article
         </th>
-        <td mat-cell *matCellDef="let item" class="truncate-cell">
-          {{ item.title }}
+        <td mat-cell *matCellDef="let sale" class="truncate-cell">
+          {{ sale.item.title }}
         </td>
         <td
           mat-footer-cell
@@ -71,10 +71,10 @@
         </th>
         <td
           mat-cell
-          *matCellDef="let item"
+          *matCellDef="let sale"
           [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
-          {{ item.quantity | number }}
+          {{ sale.quantity | number }}
         </td>
         <td
           mat-footer-cell
@@ -91,12 +91,16 @@
           mat-header-cell
           *matHeaderCellDef
           mat-sort-header
-          matTooltip="Prix de vente unitaire"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
-          PV
+          Prix unitaire
         </th>
-        <td mat-cell *matCellDef="let item">
-          {{ item.sellingPrice | number }}
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          {{ sale.item.sellingPrice | number }}
         </td>
         <td
           mat-footer-cell
@@ -112,7 +116,6 @@
         <th
           mat-header-cell
           *matHeaderCellDef
-          matTooltip="Prix de vente total"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
@@ -122,13 +125,13 @@
         </th>
         <td
           mat-cell
-          *matCellDef="let item"
+          *matCellDef="let sale"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
           "
         >
-          {{ item.sellingPrice * item.quantity | number }}
+          {{ sale.item.sellingPrice * sale.quantity | number }}
         </td>
         <td
           mat-footer-cell
@@ -138,7 +141,7 @@
             (viewPoint$ | async) === 'XSmall'
           "
         >
-          {{ sellingTotalSum() | number }}$
+          {{ saleTotalSum() | number }}$
         </td>
       </ng-container>
 
@@ -150,14 +153,14 @@
           matTooltip="Bénéfice unitaire"
           [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
-          Bénefice
+          Bénéfice
         </th>
         <td
           mat-cell
-          *matCellDef="let item"
+          *matCellDef="let sale"
           [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
-          {{ item.sellingPrice - item.purchasePrice | number }}
+          {{ sale.item.sellingPrice - sale.item.purchasePrice | number }}
         </td>
         <td
           mat-footer-cell
@@ -183,14 +186,15 @@
         </th>
         <td
           mat-cell
-          *matCellDef="let item"
+          *matCellDef="let sale"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
           "
         >
           {{
-            (item.sellingPrice - item.purchasePrice) * item.quantity | number
+            (sale.item.sellingPrice - sale.item.purchasePrice) * sale.quantity
+              | number
           }}
         </td>
         <td
@@ -206,21 +210,15 @@
       </ng-container>
 
       <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let item">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let sale">
           <button
             mat-icon-button
-            matTooltip="Modifier"
-            (click)="onUpdateItem(item)"
+            matTooltip="Annuler cette vente"
+            *ngIf="sale.quantity"
+            (click)="onCancelSale(sale)"
           >
-            <mat-icon>mode_edit</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            matTooltip="Déstocker"
-            (click)="onArchiveItem(item)"
-          >
-            <mat-icon>logout</mat-icon>
+            <mat-icon>cancel</mat-icon>
           </button>
         </td>
         <td
@@ -236,79 +234,73 @@
       <ng-container matColumnDef="expandedDetail">
         <td
           mat-cell
-          *matCellDef="let item"
+          *matCellDef="let sale"
           [attr.colspan]="displayedColumns.length"
         >
           <div
             class="item-detail"
-            [@detailExpand]="item === expandedItem ? 'expanded' : 'collapsed'"
+            [@detailExpand]="sale === expandedSale ? 'expanded' : 'collapsed'"
           >
             <div class="item-container">
-              <h1>Autres détails de l'article</h1>
+              <h1>Autres détails de la vente</h1>
               <mat-divider></mat-divider>
               <div class="text-img-container">
                 <div class="text-container" style="margin-top: 1rem">
                   <p>
-                    code de l'article: <b> {{ item.id }} </b>
-                  </p>
-                  <p>
-                    Nom de l'article: <b> {{ item.title }} </b>
-                  </p>
-                  <p>
-                    Unité de mésure: <b> {{ item.unit }} </b>
+                    Nom de l'article: <b> {{ sale.item.title }} </b>
                   </p>
                   <p>
                     Quantité :
-                    <b> {{ item.quantity | number }} {{ item.unit }}(s) </b>
+                    <b>
+                      {{ sale.quantity | number }}
+                      {{ sale.item.unit }}(s)
+                    </b>
                   </p>
                   <p>
                     Prix d'achat unitaire :
-                    <b> {{ item.purchasePrice | number }} $</b>
+                    <b> {{ sale.item.purchasePrice | number }} $</b>
                   </p>
                   <p>
-                    Prix d'achat total:
-                    <b> {{ item.purchasePrice * item.quantity | number }} $</b>
+                    Prix de vente unitaire :
+                    <b> {{ sale.item.sellingPrice | number }} $</b>
                   </p>
                   <p>
-                    Prix de vente:
-                    <b> {{ item.sellingPrice | number }} $</b>
-                  </p>
-                  <p>
-                    Prix de vente total:
-                    <b> {{ item.sellingPrice * item.quantity | number }} $</b>
-                  </p>
-                  <p>
-                    Bénéfice unitaire:
-                    <b>
-                      {{ item.sellingPrice - item.purchasePrice | number }} $</b
-                    >
-                  </p>
-                  <p>
-                    Bénéfice total:
+                    Bénefice unitaire :
                     <b>
                       {{
-                        (item.sellingPrice - item.purchasePrice) * item.quantity
+                        sale.item.sellingPrice - sale.item.purchasePrice
                           | number
                       }}
                       $</b
                     >
                   </p>
                   <p>
-                    Stock de sécurité : <b> {{ item.satetyStock }}</b>
+                    Prix de vente total:
+                    <b>
+                      {{ sale.item.sellingPrice * sale.quantity | number }}
+                      $</b
+                    >
+                  </p>
+                  <p>
+                    Bénefice total :
+                    <b>
+                      {{
+                        (sale.item.sellingPrice - sale.item.purchasePrice) *
+                          sale.quantity | number
+                      }}
+                      $</b
+                    >
                   </p>
                   <p>
                     Date d'ajout :
-                    <b> {{ formatedDate(item.created) }}</b>
-                  </p>
-                  <p>
-                    Déscription de l'article: <b> {{ item.description }} </b>
+                    <b> {{ formatedDate(sale.created) }}</b>
                   </p>
                 </div>
                 <div class="img-container">
                   <img
-                    *ngFor="let imgUrl of item.imgUrls"
+                    *ngFor="let imgUrl of sale.item.imgUrls"
                     [ngSrc]="imgUrl"
-                    [alt]="item.title"
+                    [alt]="sale.title"
                     height="150"
                     width="150"
                   />
@@ -324,15 +316,15 @@
 
       <tr
         mat-row
-        *matRowDef="let item; columns: displayedColumns"
+        *matRowDef="let sale; columns: displayedColumns"
         class="item-row"
-        [class.expanded-row]="expandedItem === item"
-        (click)="expandedItem = expandedItem === item ? null : item"
+        [class.expanded-row]="expandedSale === sale"
+        (click)="expandedSale = expandedSale === sale ? null : sale"
       ></tr>
 
       <tr
         mat-row
-        *matRowDef="let item; columns: ['expandedDetail']"
+        *matRowDef="let sale; columns: ['expandedDetail']"
         class="detail-row"
       ></tr>
 
@@ -353,7 +345,7 @@
 
     <mat-paginator
       [pageSizeOptions]="[10, 25, 100]"
-      aria-label="Sélectionnez la page des items"
+      aria-label="Sélectionnez la page des sales"
       showFirstLastButtons
     ></mat-paginator>
   </div>
