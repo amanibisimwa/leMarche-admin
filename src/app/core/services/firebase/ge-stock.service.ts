@@ -1,9 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  CollectionReference,
-  DocumentData,
   Firestore,
-  addDoc,
   collection,
   collectionData,
   deleteDoc,
@@ -12,16 +9,18 @@ import {
   query,
   setDoc,
   where,
+  docData,
 } from '@angular/fire/firestore';
 import {
   archiveCol,
-  categoryCol,
   itemCol,
   purchaseCol,
+  saleCol,
 } from './_firestore.collection';
 import { Item } from '../../models/item.model';
 import { Archieve } from '../../models/archive.model';
 import { Purchase } from '../../models/purchase.model';
+import { Sale } from '../../models/sale.model';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +35,10 @@ export class GeStockService {
   setItem = (i: Item) => setDoc(doc(this.fs, itemCol, i.id), i);
   setArchive = (a: Archieve) => setDoc(doc(this.fs, archiveCol, a.id!), a);
   setPurchase = (p: Purchase) => setDoc(doc(this.fs, purchaseCol, p.id!), p);
+  setSale = (s: Sale) => setDoc(doc(this.fs, saleCol, s.id!), s);
+
+  //Récuperer un article en stock
+  getItem = (itemId: string) => docData(doc(this.fs, itemCol, itemId));
 
   //Récupérer des données depuis une collection dans Firestore
   getCollectionData(colName: string) {

@@ -97,10 +97,6 @@ export default class StockComponent {
   formatedDate = (timestamp: Timestamp) => this.us.getFormatedDate(timestamp);
 
   ngOnInit() {
-    this.getItems();
-  }
-
-  getItems() {
     this.subscription = this.gs
       .getCollectionData(itemCol)
       .subscribe((docData) => {

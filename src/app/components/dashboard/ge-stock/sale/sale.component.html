@@ -1,1 +1,352 @@
-<p>sale works!</p>
+<main>
+  <app-header-table-action
+    btnLabel="Nouvelle vente"
+    searchPlaceholder="Rechercher par nom, numèro et date de l'article dans l'approvisionnement"
+    [dialogComponent]="newSaleComponent"
+    [tableDataSource]="dataSource"
+    [collectionName]="saleCollection"
+  />
+
+  <div class="table-container mat-elevation-z1">
+    <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
+      <ng-container matColumnDef="position">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          N°
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ dataSource.filteredData.indexOf(sale) + 1 }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          Total
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          Nom de l'article
+        </th>
+        <td mat-cell *matCellDef="let sale" class="truncate-cell">
+          {{ sale.item.title }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="quantity">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          Quantité
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          {{ sale.quantity | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="sellingPrice">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          Prix unitaire
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          {{ sale.item.sellingPrice | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="sellingTotalPrice">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          PV Total
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ sale.item.sellingPrice * sale.quantity | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ saleTotalSum() | number }}$
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="profit">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          matTooltip="Bénéfice unitaire"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          Bénéfice
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
+        >
+          {{ sale.item.sellingPrice - sale.item.purchasePrice | number }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalProfit">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          matTooltip="Bénéfice total"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          B Total
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{
+            (sale.item.sellingPrice - sale.item.purchasePrice) * sale.quantity
+              | number
+          }}
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        >
+          {{ profitTotalSum() | number }}$
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let sale">
+          <button
+            mat-icon-button
+            matTooltip="Annuler cette vente"
+            *ngIf="sale.quantity"
+            (click)="onCancelSale(sale)"
+          >
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </td>
+        <td
+          mat-footer-cell
+          *matFooterCellDef
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
+        ></td>
+      </ng-container>
+
+      <ng-container matColumnDef="expandedDetail">
+        <td
+          mat-cell
+          *matCellDef="let sale"
+          [attr.colspan]="displayedColumns.length"
+        >
+          <div
+            class="item-detail"
+            [@detailExpand]="sale === expandedSale ? 'expanded' : 'collapsed'"
+          >
+            <div class="item-container">
+              <h1>Autres détails de la vente</h1>
+              <mat-divider></mat-divider>
+              <div class="text-img-container">
+                <div class="text-container" style="margin-top: 1rem">
+                  <p>
+                    Nom de l'article: <b> {{ sale.item.title }} </b>
+                  </p>
+                  <p>
+                    Quantité :
+                    <b>
+                      {{ sale.quantity | number }}
+                      {{ sale.item.unit }}(s)
+                    </b>
+                  </p>
+                  <p>
+                    Prix d'achat unitaire :
+                    <b> {{ sale.item.purchasePrice | number }} $</b>
+                  </p>
+                  <p>
+                    Prix de vente unitaire :
+                    <b> {{ sale.item.sellingPrice | number }} $</b>
+                  </p>
+                  <p>
+                    Bénefice unitaire :
+                    <b>
+                      {{
+                        sale.item.sellingPrice - sale.item.purchasePrice
+                          | number
+                      }}
+                      $</b
+                    >
+                  </p>
+                  <p>
+                    Prix de vente total:
+                    <b>
+                      {{ sale.item.sellingPrice * sale.quantity | number }}
+                      $</b
+                    >
+                  </p>
+                  <p>
+                    Bénefice total :
+                    <b>
+                      {{
+                        (sale.item.sellingPrice - sale.item.purchasePrice) *
+                          sale.quantity | number
+                      }}
+                      $</b
+                    >
+                  </p>
+                  <p>
+                    Date d'ajout :
+                    <b> {{ formatedDate(sale.created) }}</b>
+                  </p>
+                </div>
+                <div class="img-container">
+                  <img
+                    *ngFor="let imgUrl of sale.item.imgUrls"
+                    [ngSrc]="imgUrl"
+                    [alt]="sale.title"
+                    height="150"
+                    width="150"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Define columns and rows. -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+
+      <tr
+        mat-row
+        *matRowDef="let sale; columns: displayedColumns"
+        class="item-row"
+        [class.expanded-row]="expandedSale === sale"
+        (click)="expandedSale = expandedSale === sale ? null : sale"
+      ></tr>
+
+      <tr
+        mat-row
+        *matRowDef="let sale; columns: ['expandedDetail']"
+        class="detail-row"
+      ></tr>
+
+      <!-- Table footer. -->
+      <tr
+        mat-footer-row
+        *matFooterRowDef="displayedColumns"
+        class="mat-footer-row"
+      ></tr>
+
+      <!-- Row shown when there is no matching data. -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell mat-no-data-row" colspan="8" align="center">
+          Pas des données correpondantes
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator
+      [pageSizeOptions]="[10, 25, 100]"
+      aria-label="Sélectionnez la page des sales"
+      showFirstLastButtons
+    ></mat-paginator>
+  </div>
+</main>

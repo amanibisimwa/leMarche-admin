@@ -20,7 +20,6 @@
       <mat-autocomplete
         #auto="matAutocomplete"
         [displayWith]="displayFn"
-        requireSelection
         autoActiveFirstOption
       >
         <mat-option *ngFor="let item of filteredItems | async" [value]="item">

@@ -21,12 +21,11 @@ import { UtilityService } from 'src/app/core/services/utilities/utility.service'
 import { Timestamp } from '@angular/fire/firestore';
 import { HeaderTableActionComponent } from '../../../shared/components/header-table-action.component';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { DeletePurchaseComponent } from './delete-purchase.component';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-purchase',
@@ -34,11 +33,11 @@ import { DeletePurchaseComponent } from './delete-purchase.component';
   imports: [
     CommonModule,
     MatTableModule,
+    MatTooltipModule,
     MatSortModule,
     MatPaginatorModule,
-    MatTooltipModule,
-    MatDividerModule,
     NgOptimizedImage,
+    MatDividerModule,
     HeaderTableActionComponent,
     MatFormFieldModule,
     MatInputModule,
@@ -91,10 +90,6 @@ export default class PurchaseComponent {
   formatedDate = (timestamp: Timestamp) => this.us.getFormatedDate(timestamp);
 
   ngOnInit() {
-    this.getPurchases();
-  }
-
-  getPurchases() {
     this.subscription = this.gs
       .getCollectionData(purchaseCol)
       .subscribe((docData) => {
@@ -125,16 +120,7 @@ export default class PurchaseComponent {
     this.dialog.open(NewPurchaseComponent, {
       hasBackdrop: true,
       disableClose: true,
-      data: purchase,
       autoFocus: false,
-    });
-  }
-
-  onDeletePurchase(purchase: Purchase) {
-    this.dialog.open(DeletePurchaseComponent, {
-      width: '25rem',
-      hasBackdrop: true,
-      disableClose: true,
       data: purchase,
     });
   }

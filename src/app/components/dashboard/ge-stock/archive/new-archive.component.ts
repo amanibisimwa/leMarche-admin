@@ -50,7 +50,7 @@ import {
             placeholder="Ex: L'article expiré"
             formControlName="reason"
             #input
-            maxlength="25"
+            maxlength="50"
           />
           <mat-hint align="end">{{ input.value.length || 0 }}/25</mat-hint>
           <mat-error *ngIf="archiveForm.controls.reason.hasError('required')"
@@ -99,7 +99,9 @@ export class NewArchiveComponent {
   isDisabledBtn = false;
   private gs = inject(GeStockService);
   private snackBar = inject(MatSnackBar);
-  readonly item = inject(MAT_DIALOG_DATA);
+  public item = inject(MAT_DIALOG_DATA);
+
+  ngOnInit(): void {}
 
   archiveForm = new FormGroup({
     reason: new FormControl('', [Validators.required]),
@@ -124,6 +126,7 @@ export class NewArchiveComponent {
 
     if (archieve.quantity < archieve.item.quantity) {
       archieve.item.quantity -= archieve.quantity;
+      archieve.item.created = archieve.created;
       this.gs.setArchive(archieve);
       this.gs.setItem(archieve.item);
       this.snackBar.open(`Déstocké avec succès`, 'OK', { duration: 10000 });
