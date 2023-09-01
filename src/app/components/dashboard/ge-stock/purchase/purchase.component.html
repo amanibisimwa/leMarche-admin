@@ -50,40 +50,23 @@
         <td mat-cell *matCellDef="let purchase" class="truncate-cell">
           {{ purchase.item.title }}
         </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        ></td>
+        <td mat-footer-cell *matFooterCellDef>
+          {{
+            (viewPoint$ | async) === "Small"
+              ? "Total"
+              : (viewPoint$ | async) === "XSmall"
+              ? "Total"
+              : ""
+          }}
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="quantity">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
-        >
-          Quantité
-        </th>
-        <td
-          mat-cell
-          *matCellDef="let purchase"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
-        >
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Quantité</th>
+        <td mat-cell *matCellDef="let purchase">
           {{ purchase.quantity | number }}
         </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        ></td>
+        <td mat-footer-cell *matFooterCellDef></td>
       </ng-container>
 
       <ng-container matColumnDef="purchasePrice">
@@ -91,14 +74,20 @@
           mat-header-cell
           *matHeaderCellDef
           mat-sort-header
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           Prix d'achat
         </th>
         <td
           mat-cell
           *matCellDef="let purchase"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           {{ purchase.item.purchasePrice | number }}
         </td>
@@ -112,53 +101,26 @@
         ></td>
       </ng-container>
 
-      <ng-container matColumnDef="purchaseTotalPrice">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          PA Total
-        </th>
-        <td
-          mat-cell
-          *matCellDef="let purchase"
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          {{ purchase.item.purchasePrice * purchase.quantity | number }}
-        </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          {{ purchaseTotalSum() | number }}$
-        </td>
-      </ng-container>
-
       <ng-container matColumnDef="profit">
         <th
           mat-header-cell
           *matHeaderCellDef
           mat-sort-header
           matTooltip="Bénéfice unitaire"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           Bénéfice
         </th>
         <td
           mat-cell
           *matCellDef="let purchase"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           {{
             purchase.item.sellingPrice - purchase.item.purchasePrice | number
@@ -174,25 +136,29 @@
         ></td>
       </ng-container>
 
+      <ng-container matColumnDef="purchaseTotalPrice">
+        <th mat-header-cell *matHeaderCellDef>PA Total</th>
+        <td mat-cell *matCellDef="let purchase">
+          {{ purchase.item.purchasePrice * purchase.quantity | number }}
+        </td>
+        <td mat-footer-cell *matFooterCellDef>
+          {{ purchaseTotalSum() | number }}$
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="totalProfit">
         <th
           mat-header-cell
           *matHeaderCellDef
           matTooltip="Bénéfice total"
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
           B Total
         </th>
         <td
           mat-cell
           *matCellDef="let purchase"
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
           {{
             (purchase.item.sellingPrice - purchase.item.purchasePrice) *
@@ -202,10 +168,7 @@
         <td
           mat-footer-cell
           *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
           {{ profitTotalSum() | number }}$
         </td>
@@ -222,14 +185,7 @@
             <mat-icon>mode_edit</mat-icon>
           </button>
         </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        ></td>
+        <td mat-footer-cell *matFooterCellDef></td>
       </ng-container>
 
       <ng-container matColumnDef="expandedDetail">

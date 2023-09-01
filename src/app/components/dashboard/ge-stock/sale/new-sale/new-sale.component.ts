@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -50,10 +50,9 @@ import { serverTimestamp } from '@angular/fire/firestore';
 })
 export class NewSaleComponent {
   isDisabledBtn = false;
+  itemSub?: Subscription;
   private gs = inject(GeStockService);
   private snackBar = inject(MatSnackBar);
-  readonly sale: Sale = inject(MAT_DIALOG_DATA);
-  itemSub?: Subscription;
 
   filteredItems?: Observable<Item[]>;
   displayFn = (item: Item) => (item ? item.title : '');
@@ -112,13 +111,13 @@ export class NewSaleComponent {
     };
 
     if (typeof sale.item === 'object') {
-      //Modification de l'article en Stock
-      sale.item.sellingPrice = Number(formValue.sellingPrice);
-      sale.item.created = sale.created;
-      sale.item.quantity -= sale.quantity;
-      //Enregistrement de modification de l'article
-      //Enregistrement de la nouvelle vente ou sa modification
       if (sale.item.quantity > 0) {
+        //Modification de l'article en Stock
+        sale.item.sellingPrice = Number(formValue.sellingPrice);
+        sale.item.created = sale.created;
+        sale.item.quantity -= sale.quantity;
+        //Enregistrement de modification de l'article
+        //Enregistrement de la nouvelle vente ou sa modification
         this.gs.setItem(sale.item);
         this.gs.setSale(sale);
         const notificationMsg = `${sale.item.title} vendu avec succès`;

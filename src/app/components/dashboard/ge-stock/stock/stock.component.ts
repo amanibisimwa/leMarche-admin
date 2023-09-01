@@ -76,9 +76,11 @@ export default class StockComponent {
     'position',
     'title',
     'quantity',
+    'purchasePrice',
     'sellingPrice',
-    'sellingTotalPrice',
     'profit',
+    'purchaseTotalPrice',
+    'sellingTotalPrice',
     'totalProfit',
     'action',
   ];
@@ -105,6 +107,13 @@ export default class StockComponent {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
       });
+  }
+
+  purchaseTotalSum() {
+    const totalPurchasePrices = this.dataSource.filteredData.map(
+      (item) => item.purchasePrice * item.quantity
+    );
+    return totalPurchasePrices.reduce((acc, value) => acc + value, 0);
   }
 
   sellingTotalSum() {

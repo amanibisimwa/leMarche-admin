@@ -70,8 +70,8 @@ export default class PurchaseComponent {
     'title',
     'quantity',
     'purchasePrice',
-    'purchaseTotalPrice',
     'profit',
+    'purchaseTotalPrice',
     'totalProfit',
     'action',
   ];

@@ -54,10 +54,11 @@ import { serverTimestamp } from '@angular/fire/firestore';
 })
 export class NewPurchaseComponent {
   isDisabledBtn = false;
+  itemSub?: Subscription;
   private gs = inject(GeStockService);
   private snackBar = inject(MatSnackBar);
   readonly purchase: Purchase = inject(MAT_DIALOG_DATA);
-  itemSub?: Subscription;
+  readonly item$ = this.gs.getItem(this.purchase.item.id) as Observable<Item>;
 
   filteredItems?: Observable<Item[]>;
   displayFn = (item: Item) => (item ? item.title : '');
@@ -119,7 +120,7 @@ export class NewPurchaseComponent {
     return this.purchaseForm.value.item?.sellingPrice;
   }
 
-  onSubmit() {
+  onSubmit(item: Item) {
     this.isDisabledBtn = true;
     const purchaseDocID = this.gs.docId(purchaseCol);
     const formValue = this.purchaseForm.value;
@@ -133,21 +134,23 @@ export class NewPurchaseComponent {
 
     if (typeof purchase.item === 'object') {
       //Modification de l'article en Stock
-      purchase.item.purchasePrice = Number(formValue.purchasePrice);
-      purchase.item.sellingPrice = Number(formValue.sellingPrice);
-      purchase.item.created = purchase.created;
-
       //Enregistrement de modification de l'article
-      //Enregistrement du nouvel approvisionnement ou sa modification
       if (this.purchase) {
-        purchase.id = this.purchase.id;
-        purchase.item.quantity -= this.purchase.quantity;
-        purchase.item.quantity += purchase.quantity;
+        item.purchasePrice = Number(formValue.purchasePrice);
+        item.sellingPrice = Number(formValue.sellingPrice);
+        item.quantity -= this.purchase.quantity;
+        item.quantity += purchase.quantity;
+        item.created = purchase.created;
+        this.gs.setItem(item);
       } else {
+        purchase.item.purchasePrice = Number(formValue.purchasePrice);
+        purchase.item.sellingPrice = Number(formValue.sellingPrice);
         purchase.item.quantity += purchase.quantity;
+        purchase.item.created = purchase.created;
+        this.gs.setItem(purchase.item);
       }
 
-      this.gs.setItem(purchase.item);
+      //Enregistrement du nouvel approvisionnement ou sa modification
       this.gs.setPurchase(purchase);
       const notificationMsg = `${purchase.item.title} enregistré avec succès`;
       this.snackBar.open(notificationMsg, '', { duration: 10000 });

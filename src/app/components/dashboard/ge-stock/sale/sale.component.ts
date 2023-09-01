@@ -71,8 +71,8 @@ export default class SaleComponent {
     'title',
     'quantity',
     'sellingPrice',
-    'sellingTotalPrice',
     'profit',
+    'sellingTotalPrice',
     'totalProfit',
     'action',
   ];

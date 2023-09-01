@@ -90,7 +90,8 @@
       mat-dialog-close
       color="primary"
       [disabled]="purchaseForm.invalid || isDisabledBtn"
-      (click)="onSubmit()"
+      *ngIf="item$ | async as item"
+      (click)="onSubmit(item)"
     >
       Enregistrer
     </button>
