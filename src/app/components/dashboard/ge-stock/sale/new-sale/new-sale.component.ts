@@ -18,12 +18,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription, Observable, startWith, map } from 'rxjs';
 import { Item } from 'src/app/core/models/item.model';
 import { Sale } from 'src/app/core/models/sale.model';
-import {
-  itemCol,
-  saleCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { serverTimestamp } from '@angular/fire/firestore';
+import {
+  shopItemCol,
+  shopSaleCol,
+} from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-new-sale',
@@ -51,7 +51,7 @@ import { serverTimestamp } from '@angular/fire/firestore';
 export class NewSaleComponent {
   isDisabledBtn = false;
   itemSub?: Subscription;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private snackBar = inject(MatSnackBar);
 
   filteredItems?: Observable<Item[]>;
@@ -68,7 +68,7 @@ export class NewSaleComponent {
   }
 
   ngOnInit(): void {
-    const items$ = this.gs.getCollectionData(itemCol) as Observable<Item[]>;
+    const items$ = this.fs.getCollectionData(shopItemCol) as Observable<Item[]>;
 
     this.itemSub = items$.subscribe((items) => {
       this.filteredItems = this.saleForm.controls['item'].valueChanges.pipe(
@@ -99,7 +99,7 @@ export class NewSaleComponent {
 
   onSubmit() {
     this.isDisabledBtn = true;
-    const saleDocID = this.gs.docId(saleCol);
+    const saleDocID = this.fs.docId(shopSaleCol);
     const formValue = this.saleForm.value;
 
     const sale: Sale = {
@@ -118,8 +118,8 @@ export class NewSaleComponent {
         sale.item.quantity -= sale.quantity;
         //Enregistrement de modification de l'article
         //Enregistrement de la nouvelle vente ou sa modification
-        this.gs.setItem(sale.item);
-        this.gs.setSale(sale);
+        this.fs.setItem(sale.item);
+        this.fs.setSale(sale);
         const notificationMsg = `${sale.item.title} vendu avec succès`;
         this.snackBar.open(notificationMsg, '', { duration: 10000 });
       } else {

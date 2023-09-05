@@ -16,10 +16,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import {
-  archiveCol,
-  itemCol,
+  shopArchiveCol,
+  shopItemCol,
 } from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
@@ -97,7 +97,7 @@ import {
 })
 export class NewArchiveComponent {
   isDisabledBtn = false;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private snackBar = inject(MatSnackBar);
   public item = inject(MAT_DIALOG_DATA);
 
@@ -113,7 +113,7 @@ export class NewArchiveComponent {
 
   onSubmit() {
     this.isDisabledBtn = true;
-    const archiveDocID = this.gs.docId(archiveCol);
+    const archiveDocID = this.fs.docId(shopArchiveCol);
     const formValue = this.archiveForm.value;
 
     const archieve: Archieve = {
@@ -127,12 +127,12 @@ export class NewArchiveComponent {
     if (archieve.quantity < archieve.item.quantity) {
       archieve.item.quantity -= archieve.quantity;
       archieve.item.created = archieve.created;
-      this.gs.setArchive(archieve);
-      this.gs.setItem(archieve.item);
+      this.fs.setArchive(archieve);
+      this.fs.setItem(archieve.item);
       this.snackBar.open(`Déstocké avec succès`, 'OK', { duration: 10000 });
     } else if (archieve.quantity === archieve.item.quantity) {
-      this.gs.setArchive(archieve);
-      this.gs.deleteDocData(itemCol, this.item.id!);
+      this.fs.setArchive(archieve);
+      this.fs.deleteDocData(shopItemCol, this.item.id!);
       this.snackBar.open(`Tout a été déstocké avec succès`, 'OK', {
         duration: 10000,
       });

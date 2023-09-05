@@ -27,12 +27,12 @@ import {
 } from '@angular/animations';
 import { Item } from 'src/app/core/models/item.model';
 import { Subscription } from 'rxjs';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { NewArchiveComponent } from '../archive/new-archive.component';
-import { itemCol } from 'src/app/core/services/firebase/_firestore.collection';
+import { shopItemCol } from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-stock',
@@ -70,7 +70,7 @@ import { itemCol } from 'src/app/core/services/firebase/_firestore.collection';
 })
 export default class StockComponent {
   newItemComponent = NewItemComponent;
-  itemCollection = itemCol;
+  itemCollection = shopItemCol;
 
   displayedColumns = [
     'position',
@@ -87,7 +87,7 @@ export default class StockComponent {
 
   expandedItem?: Item | null;
   subscription!: Subscription;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   dataSource = new MatTableDataSource<Item>();
   private us = inject(UtilityService);
   private dialog = inject(MatDialog);
@@ -99,8 +99,8 @@ export default class StockComponent {
   formatedDate = (timestamp: Timestamp) => this.us.getFormatedDate(timestamp);
 
   ngOnInit() {
-    this.subscription = this.gs
-      .getCollectionData(itemCol)
+    this.subscription = this.fs
+      .getCollectionData(shopItemCol)
       .subscribe((docData) => {
         const items = docData as Item[];
         this.dataSource.data = items;

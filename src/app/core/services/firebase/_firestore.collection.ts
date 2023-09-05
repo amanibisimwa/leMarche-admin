@@ -1,7 +1,9 @@
-export const shopCol = 'shops';
-export const userCol = 'users';
-export const categoryCol = 'categories';
+const shopId = localStorage.getItem('shopId');
+export const shopCollection = 'shops';
+export const userCollection = 'users';
+export const categoryCollection = 'categories';
 export const itemCol = 'items';
-export const archiveCol = 'archives';
-export const saleCol = 'sales';
-export const purchaseCol = 'purchases';
+export const shopItemCol = `${shopCollection}/${shopId!}/items`;
+export const shopArchiveCol = `${shopCollection}/${shopId!}/archives`;
+export const shopSaleCol = `${shopCollection}/${shopId!}/sales`;
+export const shopPurchaseCol = `${shopCollection}/${shopId!}/purchases`;

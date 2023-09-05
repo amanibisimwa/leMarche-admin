@@ -10,35 +10,53 @@ import {
   setDoc,
   where,
   docData,
+  updateDoc,
+  getDoc,
 } from '@angular/fire/firestore';
-import {
-  archiveCol,
-  itemCol,
-  purchaseCol,
-  saleCol,
-} from './_firestore.collection';
 import { Item } from '../../models/item.model';
 import { Archieve } from '../../models/archive.model';
 import { Purchase } from '../../models/purchase.model';
 import { Sale } from '../../models/sale.model';
+import {
+  shopArchiveCol,
+  shopCollection,
+  shopItemCol,
+  shopPurchaseCol,
+  shopSaleCol,
+} from './_firestore.collection';
+import { Shop } from '../../models/shop.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class GeStockService {
+export class FirestoreService {
   private fs: Firestore = inject(Firestore);
+
+  //Réference des sous collections de la collection "shops"
+  shopColRef = collection(this.fs, shopCollection);
+  itemColRef = collection(this.fs, shopItemCol);
+  archiveColRef = collection(this.fs, shopArchiveCol);
+  purchaseColRef = collection(this.fs, shopPurchaseCol);
+  saleColRef = collection(this.fs, shopSaleCol);
 
   //Générer un identifiant de document en local
   docId = (colName: string) => doc(collection(this.fs, colName)).id;
 
   //Creation ou modification d'un document
-  setItem = (i: Item) => setDoc(doc(this.fs, itemCol, i.id), i);
-  setArchive = (a: Archieve) => setDoc(doc(this.fs, archiveCol, a.id!), a);
-  setPurchase = (p: Purchase) => setDoc(doc(this.fs, purchaseCol, p.id!), p);
-  setSale = (s: Sale) => setDoc(doc(this.fs, saleCol, s.id!), s);
+  newShop = (s: Shop) => setDoc(doc(this.shopColRef, s.id), s);
+  setItem = (i: Item) => setDoc(doc(this.itemColRef, i.id), i);
+  setArchive = (a: Archieve) => setDoc(doc(this.archiveColRef, a.id!), a);
+  setPurchase = (p: Purchase) => setDoc(doc(this.purchaseColRef, p.id!), p);
+  setSale = (s: Sale) => setDoc(doc(this.saleColRef, s.id!), s);
+
+  async shopExists(shopId: string) {
+    const shopDocRef = doc(this.shopColRef, shopId);
+    const shopDoc = await getDoc(shopDocRef);
+    return shopDoc.exists();
+  }
 
   //Récuperer un article en stock
-  getItem = (itemId: string) => docData(doc(this.fs, itemCol, itemId));
+  getItem = (itemId: string) => docData(doc(this.itemColRef, itemId));
 
   //Récupérer des données depuis une collection dans Firestore
   getCollectionData(colName: string) {

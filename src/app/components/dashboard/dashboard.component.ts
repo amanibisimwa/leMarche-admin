@@ -54,7 +54,7 @@ import { appTitle } from 'src/app/app.config';
         width="35"
         height="35"
         [ngSrc]="
-          user?.photoURL ??
+          (currentUser | async)?.photoURL ??
           'https://images.vexels.com/content/145908/preview/male-avatar-maker-2a7919.png'
         "
         alt="Image de profile LeMarché admin"
@@ -212,7 +212,7 @@ export default class DashboardComponent {
   appName = appTitle;
   private authService = inject(AuthService);
   private router = inject(Router);
-  user = this.authService.user;
+  currentUser = this.authService.user;
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
   private sts = inject(SwitchThemeService);
 
@@ -228,6 +228,7 @@ export default class DashboardComponent {
 
   logOut = async () => {
     await this.authService.logout();
+    localStorage.removeItem('shopId');
     this.router.navigate(['/login']);
   };
 }

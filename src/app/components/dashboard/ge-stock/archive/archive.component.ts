@@ -2,11 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { Subscription } from 'rxjs';
-import { archiveCol } from 'src/app/core/services/firebase/_firestore.collection';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { MediaQueryObserverService } from 'src/app/core/services/utilities/media-query-observer.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
+import { shopArchiveCol } from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-archive',
@@ -146,9 +146,9 @@ export default class ArchiveComponent {
   ];
 
   subscription!: Subscription;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private us = inject(UtilityService);
-  dataSource = this.gs.getCollectionData(archiveCol);
+  dataSource = this.fs.getCollectionData(shopArchiveCol);
 
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
   formatedDate = (timestamp: Timestamp) => this.us.getFormatedDate(timestamp);

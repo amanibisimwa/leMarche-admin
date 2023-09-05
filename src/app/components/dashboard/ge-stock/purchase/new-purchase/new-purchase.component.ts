@@ -7,18 +7,10 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Item } from 'src/app/core/models/item.model';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
-import {
-  MatDialog,
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subscription, Observable, startWith, map } from 'rxjs';
-import {
-  itemCol,
-  purchaseCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -28,6 +20,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Purchase } from 'src/app/core/models/purchase.model';
 import { serverTimestamp } from '@angular/fire/firestore';
+import {
+  shopItemCol,
+  shopPurchaseCol,
+} from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-new-purchase',
@@ -55,10 +51,10 @@ import { serverTimestamp } from '@angular/fire/firestore';
 export class NewPurchaseComponent {
   isDisabledBtn = false;
   itemSub?: Subscription;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private snackBar = inject(MatSnackBar);
   readonly purchase: Purchase = inject(MAT_DIALOG_DATA);
-  readonly item$ = this.gs.getItem(this.purchase.item.id) as Observable<Item>;
+  readonly item$ = this.fs.getItem(this.purchase.item.id) as Observable<Item>;
 
   filteredItems?: Observable<Item[]>;
   displayFn = (item: Item) => (item ? item.title : '');
@@ -77,7 +73,7 @@ export class NewPurchaseComponent {
   }
 
   ngOnInit(): void {
-    const items$ = this.gs.getCollectionData(itemCol) as Observable<Item[]>;
+    const items$ = this.fs.getCollectionData(shopItemCol) as Observable<Item[]>;
 
     this.itemSub = items$.subscribe((items) => {
       this.filteredItems = this.purchaseForm.controls['item'].valueChanges.pipe(
@@ -122,7 +118,7 @@ export class NewPurchaseComponent {
 
   onSubmit(item: Item) {
     this.isDisabledBtn = true;
-    const purchaseDocID = this.gs.docId(purchaseCol);
+    const purchaseDocID = this.fs.docId(shopPurchaseCol);
     const formValue = this.purchaseForm.value;
 
     const purchase: Purchase = {
@@ -141,17 +137,17 @@ export class NewPurchaseComponent {
         item.quantity -= this.purchase.quantity;
         item.quantity += purchase.quantity;
         item.created = purchase.created;
-        this.gs.setItem(item);
+        this.fs.setItem(item);
       } else {
         purchase.item.purchasePrice = Number(formValue.purchasePrice);
         purchase.item.sellingPrice = Number(formValue.sellingPrice);
         purchase.item.quantity += purchase.quantity;
         purchase.item.created = purchase.created;
-        this.gs.setItem(purchase.item);
+        this.fs.setItem(purchase.item);
       }
 
       //Enregistrement du nouvel approvisionnement ou sa modification
-      this.gs.setPurchase(purchase);
+      this.fs.setPurchase(purchase);
       const notificationMsg = `${purchase.item.title} enregistré avec succès`;
       this.snackBar.open(notificationMsg, '', { duration: 10000 });
     } else {

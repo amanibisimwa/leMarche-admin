@@ -63,13 +63,10 @@ export class FormFieldValidatorService {
     isSubCollection?: boolean
   ) {
     const value = control.value;
-    localStorage.setItem('shopId', value);
     const colRef = collection(this.fs, collectionName);
     const subColRef = collectionGroup(this.fs, collectionName);
-
     const queryCol = query(colRef, where(fieldName, '==', value));
     const querySubCol = query(subColRef, where(fieldName, '==', value));
-
     return isSubCollection ? querySubCol : queryCol;
   }
 }

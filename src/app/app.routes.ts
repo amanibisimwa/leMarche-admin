@@ -17,6 +17,11 @@ export const routes: Routes = [
     ...canActivate(redirectLoggedInToDashBoard),
   },
   {
+    path: 'register-shop',
+    title: `Inscription - ${appName}`,
+    loadComponent: () => import('./components/auth/shop-register.component'),
+  },
+  {
     path: 'email-link-redirection',
     title: `Redirection Email Link - ${appName}`,
     loadComponent: () =>
