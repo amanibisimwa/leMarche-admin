@@ -10,10 +10,8 @@ import {
   providedIn: 'root',
 })
 export class StorageService {
+  imageUrls = signal<any>([]);
   private storage = inject(Storage);
-
-  imageUrls = signal(['']);
-  getImgUrls = (urls: string[]) => this.imageUrls.set(urls);
 
   //changerment de l'image vers Cloud Storage
   uploadImgToStorage = async (file: File | Blob) => {

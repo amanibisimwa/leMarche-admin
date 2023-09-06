@@ -1,10 +1,10 @@
 <main>
   <app-header-table-action
-    btnLabel="Nouvel Approvisionnement"
+    btnLabel="Nouvelle vente"
     searchPlaceholder="Rechercher par nom, numèro et date de l'article dans l'approvisionnement"
-    [dialogComponent]="newPurchaseComponent"
+    [dialogComponent]="newSaleComponent"
     [tableDataSource]="dataSource"
-    [collectionName]="purchaseCollection"
+    [collectionName]="saleCollection"
   />
 
   <div class="table-container mat-elevation-z1">
@@ -23,13 +23,13 @@
         </th>
         <td
           mat-cell
-          *matCellDef="let purchase"
+          *matCellDef="let sale"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
           "
         >
-          {{ dataSource.filteredData.indexOf(purchase) + 1 }}
+          {{ dataSource.filteredData.indexOf(sale) + 1 }}
         </td>
         <td
           mat-footer-cell
@@ -47,8 +47,8 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>
           Nom de l'article
         </th>
-        <td mat-cell *matCellDef="let purchase" class="truncate-cell">
-          {{ purchase.item.title }}
+        <td mat-cell *matCellDef="let sale" class="truncate-cell">
+          {{ sale.item.title }}
         </td>
         <td mat-footer-cell *matFooterCellDef>
           {{
@@ -63,13 +63,13 @@
 
       <ng-container matColumnDef="quantity">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Quantité</th>
-        <td mat-cell *matCellDef="let purchase">
-          {{ purchase.quantity | number }}
+        <td mat-cell *matCellDef="let sale">
+          {{ sale.quantity | number }}
         </td>
         <td mat-footer-cell *matFooterCellDef></td>
       </ng-container>
 
-      <ng-container matColumnDef="purchasePrice">
+      <ng-container matColumnDef="sellingPrice">
         <th
           mat-header-cell
           *matHeaderCellDef
@@ -79,17 +79,17 @@
             (viewPoint$ | async) === 'XSmall'
           "
         >
-          Prix d'achat
+          Prix unitaire
         </th>
         <td
           mat-cell
-          *matCellDef="let purchase"
+          *matCellDef="let sale"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
           "
         >
-          {{ purchase.item.purchasePrice | number }}
+          {{ sale.item.sellingPrice | number }}
         </td>
         <td
           mat-footer-cell
@@ -116,15 +116,13 @@
         </th>
         <td
           mat-cell
-          *matCellDef="let purchase"
+          *matCellDef="let sale"
           [hidden]="
             (viewPoint$ | async) === 'Small' ||
             (viewPoint$ | async) === 'XSmall'
           "
         >
-          {{
-            purchase.item.sellingPrice - purchase.item.purchasePrice | number
-          }}
+          {{ sale.item.sellingPrice - sale.item.purchasePrice | number }}
         </td>
         <td
           mat-footer-cell
@@ -136,13 +134,13 @@
         ></td>
       </ng-container>
 
-      <ng-container matColumnDef="purchaseTotalPrice">
-        <th mat-header-cell *matHeaderCellDef>PA Total</th>
-        <td mat-cell *matCellDef="let purchase">
-          {{ purchase.item.purchasePrice * purchase.quantity | number }}
+      <ng-container matColumnDef="sellingTotalPrice">
+        <th mat-header-cell *matHeaderCellDef>PV Total</th>
+        <td mat-cell *matCellDef="let sale">
+          {{ sale.item.sellingPrice * sale.quantity | number }}
         </td>
         <td mat-footer-cell *matFooterCellDef>
-          {{ purchaseTotalSum() | number }}$
+          {{ saleTotalSum() | number }}$
         </td>
       </ng-container>
 
@@ -157,12 +155,12 @@
         </th>
         <td
           mat-cell
-          *matCellDef="let purchase"
+          *matCellDef="let sale"
           [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
           {{
-            (purchase.item.sellingPrice - purchase.item.purchasePrice) *
-              purchase.quantity | number
+            (sale.item.sellingPrice - sale.item.purchasePrice) * sale.quantity
+              | number
           }}
         </td>
         <td
@@ -175,14 +173,15 @@
       </ng-container>
 
       <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let purchase">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let sale">
           <button
             mat-icon-button
-            matTooltip="Modifier"
-            (click)="onUpdatePurchase(purchase)"
+            matTooltip="Annuler cette vente"
+            *ngIf="sale.quantity"
+            (click)="onCancelSale(sale)"
           >
-            <mat-icon>mode_edit</mat-icon>
+            <mat-icon>cancel</mat-icon>
           </button>
         </td>
         <td mat-footer-cell *matFooterCellDef></td>
@@ -191,63 +190,50 @@
       <ng-container matColumnDef="expandedDetail">
         <td
           mat-cell
-          *matCellDef="let purchase"
+          *matCellDef="let sale"
           [attr.colspan]="displayedColumns.length"
         >
           <div
             class="item-detail"
-            [@detailExpand]="
-              purchase === expandedPurchase ? 'expanded' : 'collapsed'
-            "
+            [@detailExpand]="sale === expandedSale ? 'expanded' : 'collapsed'"
           >
             <div class="item-container">
-              <h1>Autres détails d'approvisionnement</h1>
+              <h1>Autres détails de la vente</h1>
               <mat-divider></mat-divider>
               <div class="text-img-container">
                 <div class="text-container" style="margin-top: 1rem">
                   <p>
-                    Nom de l'article: <b> {{ purchase.item.title }} </b>
+                    Nom de l'article: <b> {{ sale.item.title }} </b>
                   </p>
                   <p>
                     Quantité :
                     <b>
-                      {{ purchase.quantity | number }}
-                      {{ purchase.item.unit }}(s)
+                      {{ sale.quantity | number }}
+                      {{ sale.item.unit }}(s)
                     </b>
                   </p>
                   <p>
                     Prix d'achat unitaire :
-                    <b> {{ purchase.item.purchasePrice | number }} $</b>
-                  </p>
-                  <p>
-                    Prix d'achat total:
-                    <b>
-                      {{
-                        purchase.item.purchasePrice * purchase.quantity | number
-                      }}
-                      $</b
-                    >
+                    <b> {{ sale.item.purchasePrice | number }} $</b>
                   </p>
                   <p>
                     Prix de vente unitaire :
-                    <b> {{ purchase.item.sellingPrice | number }} $</b>
-                  </p>
-                  <p>
-                    Prix de vente total:
-                    <b>
-                      {{
-                        purchase.item.sellingPrice * purchase.quantity | number
-                      }}
-                      $</b
-                    >
+                    <b> {{ sale.item.sellingPrice | number }} $</b>
                   </p>
                   <p>
                     Bénefice unitaire :
                     <b>
                       {{
-                        purchase.item.sellingPrice - purchase.item.purchasePrice
+                        sale.item.sellingPrice - sale.item.purchasePrice
                           | number
                       }}
+                      $</b
+                    >
+                  </p>
+                  <p>
+                    Prix de vente total:
+                    <b>
+                      {{ sale.item.sellingPrice * sale.quantity | number }}
                       $</b
                     >
                   </p>
@@ -255,23 +241,22 @@
                     Bénefice total :
                     <b>
                       {{
-                        (purchase.item.sellingPrice -
-                          purchase.item.purchasePrice) *
-                          purchase.quantity | number
+                        (sale.item.sellingPrice - sale.item.purchasePrice) *
+                          sale.quantity | number
                       }}
                       $</b
                     >
                   </p>
                   <p>
                     Date d'ajout :
-                    <b> {{ formatedDate(purchase.created) }}</b>
+                    <b> {{ formatedDate(sale.created) }}</b>
                   </p>
                 </div>
                 <div class="img-container">
                   <img
-                    *ngFor="let imgUrl of purchase.item.imgUrls"
+                    *ngFor="let imgUrl of sale.item.imgUrls"
                     [ngSrc]="imgUrl"
-                    [alt]="purchase.title"
+                    [alt]="sale.title"
                     height="150"
                     width="150"
                   />
@@ -287,17 +272,17 @@
 
       <tr
         mat-row
-        *matRowDef="let purchase; columns: displayedColumns"
+        *matRowDef="let sale; columns: displayedColumns"
         class="item-row"
-        [class.expanded-row]="expandedPurchase === purchase"
-        (click)="
-          expandedPurchase = expandedPurchase === purchase ? null : purchase
-        "
+        [class.expanded-row]="expandedSale === sale"
+        [class.isCanceled]="sale.isCanceled"
+        [matTooltip]="sale.isCanceled ? 'Cette vente a été annulée' : ''"
+        (click)="expandedSale = expandedSale === sale ? null : sale"
       ></tr>
 
       <tr
         mat-row
-        *matRowDef="let purchase; columns: ['expandedDetail']"
+        *matRowDef="let sale; columns: ['expandedDetail']"
         class="detail-row"
       ></tr>
 
@@ -318,7 +303,7 @@
 
     <mat-paginator
       [pageSizeOptions]="[10, 25, 100]"
-      aria-label="Sélectionnez la page des purchases"
+      aria-label="Sélectionnez la page des sales"
       showFirstLastButtons
     ></mat-paginator>
   </div>

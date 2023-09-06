@@ -3,6 +3,7 @@ import {
   PreloadAllModules,
   provideRouter,
   withPreloading,
+  withRouterConfig,
 } from '@angular/router';
 
 import { routes } from './app.routes';
