@@ -20,10 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { Purchase } from 'src/app/core/models/purchase.model';
 import { serverTimestamp } from '@angular/fire/firestore';
-import {
-  shopItemCol,
-  shopPurchaseCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
+import { LetDirective } from '@ngrx/component';
 
 @Component({
   selector: 'app-new-purchase',
@@ -40,11 +37,12 @@ import {
     ReactiveFormsModule,
     MatSnackBarModule,
     MatTooltipModule,
+    LetDirective,
   ],
   templateUrl: './new-purchase.component.html',
   styles: [
     `
-      @use '../../../../shared/styles/dialog-form.style' as *;
+      @use '../../../../shared/styles/form-field.style' as *;
     `,
   ],
 })
@@ -54,7 +52,7 @@ export class NewPurchaseComponent {
   private fs = inject(FirestoreService);
   private snackBar = inject(MatSnackBar);
   readonly purchase: Purchase = inject(MAT_DIALOG_DATA);
-  readonly item$ = this.fs.getItem(this.purchase.item.id) as Observable<Item>;
+  item$!: Observable<Item>;
 
   filteredItems?: Observable<Item[]>;
   displayFn = (item: Item) => (item ? item.title : '');
@@ -62,18 +60,18 @@ export class NewPurchaseComponent {
   private _itemFilter(itemTitle: string, items: Item[]) {
     const filterValue = itemTitle.toLowerCase();
     return items.filter((item) => {
-      this.purchaseForm.controls['purchasePrice'].setValue(
-        this.purchasePriceItemValueInStock!
-      );
-      this.purchaseForm.controls['sellingPrice'].setValue(
-        this.sellingPriceItemValueInStock!
-      );
+      this.purchaseForm.patchValue({
+        purchasePrice: item.purchasePrice,
+        sellingPrice: item.sellingPrice,
+      });
       return item.title.toLowerCase().includes(filterValue);
     });
   }
 
   ngOnInit(): void {
-    const items$ = this.fs.getCollectionData(shopItemCol) as Observable<Item[]>;
+    const items$ = this.fs.getCollectionData(
+      this.fs.itemsCollection
+    ) as Observable<Item[]>;
 
     this.itemSub = items$.subscribe((items) => {
       this.filteredItems = this.purchaseForm.controls['item'].valueChanges.pipe(
@@ -85,12 +83,14 @@ export class NewPurchaseComponent {
       );
     });
 
-    if (this.purchase)
+    if (this.purchase) {
+      this.item$ = this.fs.getItem(this.purchase.item.id) as Observable<Item>;
       this.purchaseForm.patchValue({
         purchasePrice: this.purchase.item.purchasePrice,
         sellingPrice: this.purchase.item.sellingPrice,
         ...this.purchase,
       });
+    }
   }
 
   purchaseForm = new FormGroup({
@@ -109,16 +109,9 @@ export class NewPurchaseComponent {
     ]),
   });
 
-  get purchasePriceItemValueInStock() {
-    return this.purchaseForm.value.item?.purchasePrice;
-  }
-  get sellingPriceItemValueInStock() {
-    return this.purchaseForm.value.item?.sellingPrice;
-  }
-
   onSubmit(item: Item) {
     this.isDisabledBtn = true;
-    const purchaseDocID = this.fs.docId(shopPurchaseCol);
+    const purchaseDocID = this.fs.docId(this.fs.purchaseCollection);
     const formValue = this.purchaseForm.value;
 
     const purchase: Purchase = {
@@ -132,11 +125,13 @@ export class NewPurchaseComponent {
       //Modification de l'article en Stock
       //Enregistrement de modification de l'article
       if (this.purchase) {
+        purchase.id = this.purchase.id;
         item.purchasePrice = Number(formValue.purchasePrice);
         item.sellingPrice = Number(formValue.sellingPrice);
         item.quantity -= this.purchase.quantity;
         item.quantity += purchase.quantity;
         item.created = purchase.created;
+        purchase.item = item;
         this.fs.setItem(item);
       } else {
         purchase.item.purchasePrice = Number(formValue.purchasePrice);

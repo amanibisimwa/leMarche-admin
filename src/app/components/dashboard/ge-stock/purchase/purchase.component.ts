@@ -25,7 +25,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { shopPurchaseCol } from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-purchase',
@@ -62,9 +61,6 @@ import { shopPurchaseCol } from 'src/app/core/services/firebase/_firestore.colle
   ],
 })
 export default class PurchaseComponent {
-  newPurchaseComponent = NewPurchaseComponent;
-  purchaseCollection = shopPurchaseCol;
-
   displayedColumns = [
     'position',
     'title',
@@ -82,6 +78,8 @@ export default class PurchaseComponent {
   private us = inject(UtilityService);
   private dialog = inject(MatDialog);
   dataSource = new MatTableDataSource<Purchase>();
+  newPurchaseComponent = NewPurchaseComponent;
+  purchaseCollection = this.fs.purchaseCollection;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -91,7 +89,7 @@ export default class PurchaseComponent {
 
   ngOnInit() {
     this.subscription = this.fs
-      .getCollectionData(shopPurchaseCol)
+      .getCollectionData(this.purchaseCollection)
       .subscribe((docData) => {
         const purchases = docData as Purchase[];
         this.dataSource.data = purchases;

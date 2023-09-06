@@ -41,8 +41,7 @@ import { Observable } from 'rxjs';
         *ngIf="itemInStock$ | async as item"
         (click)="onSubmit(item)"
       >
-        {{ item.quantity }} + {{ sale.quantity }} =
-        {{ item.quantity + sale.quantity }}
+        Oui
       </button>
     </div>`,
   styles: [],

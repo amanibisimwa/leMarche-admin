@@ -13,6 +13,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { appTitle } from 'src/app/app.config';
+import { Subscription } from 'rxjs';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
+import { Auth, User } from '@angular/fire/auth';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,6 +32,7 @@ import { appTitle } from 'src/app/app.config';
     MatSidenavModule,
     MatTooltipModule,
     NgOptimizedImage,
+    MatSnackBarModule,
   ],
   template: `<div class="dashboard-container">
     <mat-toolbar>
@@ -54,7 +59,7 @@ import { appTitle } from 'src/app/app.config';
         width="35"
         height="35"
         [ngSrc]="
-          (currentUser | async)?.photoURL ??
+          currentUser?.photoURL ??
           'https://images.vexels.com/content/145908/preview/male-avatar-maker-2a7919.png'
         "
         alt="Image de profile LeMarché admin"
@@ -211,10 +216,14 @@ import { appTitle } from 'src/app/app.config';
 export default class DashboardComponent {
   appName = appTitle;
   private authService = inject(AuthService);
+  readonly currentUser = inject(Auth).currentUser;
   private router = inject(Router);
-  currentUser = this.authService.user;
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
   private sts = inject(SwitchThemeService);
+  authStateSubscription!: Subscription;
+  private snackBar = inject(MatSnackBar);
+  private fs = inject(FirestoreService);
+  authState$ = this.authService.authState;
 
   toggleDrawer(drawer: MatDrawer, viewPoint: string) {
     if (viewPoint === 'Large' || viewPoint === 'XLarge') {
@@ -231,4 +240,25 @@ export default class DashboardComponent {
     localStorage.removeItem('shopId');
     this.router.navigate(['/login']);
   };
+
+  ngOnInit(): void {
+    this.authStateSubscription = this.authState$.subscribe(
+      async (user: User | null) => {
+        if (user) {
+          if (!(await this.fs.shopExists(user.uid))) {
+            this.router.navigate(['/register-shop']);
+            this.snackBar.open(
+              "Veuillez terminer l'inscription de votre shop",
+              '',
+              { duration: 10000 }
+            );
+          }
+        }
+      }
+    );
+  }
+
+  ngOnDestroy() {
+    this.authStateSubscription?.unsubscribe();
+  }
 }

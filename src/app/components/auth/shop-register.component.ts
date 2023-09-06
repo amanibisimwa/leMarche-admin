@@ -17,16 +17,15 @@ import { UtilityService } from 'src/app/core/services/utilities/utility.service'
 import { Shop } from 'src/app/core/models/shop.model';
 import { serverTimestamp } from '@angular/fire/firestore';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { FormFieldValidatorService } from 'src/app/core/services/firebase/form-field-validator.service';
-import { shopCollection } from 'src/app/core/services/firebase/_firestore.collection';
 import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { appTitle } from 'src/app/app.config';
 import { AuthService } from 'src/app/core/services/firebase/auth.service';
 import { AuthProviderComponent } from './auth-provider.component';
-import { RouterModule } from '@angular/router';
-import { User } from '@angular/fire/auth';
+import { Router, RouterModule } from '@angular/router';
+import { Auth, User } from '@angular/fire/auth';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-shop-register',
@@ -46,11 +45,15 @@ import { User } from '@angular/fire/auth';
       <mat-divider class="divider-header">></mat-divider>
       <mat-card-content class="login-container" class="mat-step-header">
         <mat-stepper linear #stepper>
-          <mat-step label="Connectez-vous">
+          <mat-step label="Connectez-vous" [editable]="!isConnected">
             <app-auth-provider />
           </mat-step>
           <mat-step label="Enregistrez votre shop">
-            <form [formGroup]="shopRegister">
+            <mat-progress-bar
+              mode="indeterminate"
+              *ngIf="isCroppedImgPending"
+            ></mat-progress-bar>
+            <form [formGroup]="shopRegister" class="shop-register-form">
               <div>
                 <input
                   class="input-file-picker"
@@ -148,8 +151,7 @@ import { User } from '@angular/fire/auth';
                 <button
                   mat-flat-button
                   color="primary"
-                  *ngIf="currentUser | async as user"
-                  (click)="onSubmit(user)"
+                  (click)="onSubmit()"
                   [disabled]="
                     isDisabledFormBtn ||
                     isCroppedImgPending ||
@@ -181,6 +183,10 @@ import { User } from '@angular/fire/auth';
 
       .mat-step-header {
         pointer-events: none;
+      }
+
+      .shop-register-form {
+        pointer-events: initial;
       }
 
       .shop-logo-img {
@@ -220,6 +226,7 @@ import { User } from '@angular/fire/auth';
     MatSnackBarModule,
     ReactiveFormsModule,
     RouterModule,
+    MatProgressBarModule,
     AuthProviderComponent,
   ],
 })
@@ -228,25 +235,26 @@ export default class ShopRegisterComponent implements OnDestroy {
   croppedImage = '';
   isCroppedImgPending = false;
   isConnected = false;
-
   dialogSubs!: Subscription;
   isDisabledFormBtn = false;
-
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private uts = inject(UtilityService);
-  private ffvs = inject(FormFieldValidatorService);
   private fs = inject(FirestoreService);
+  private currentUser = inject(Auth).currentUser;
   private authService = inject(AuthService);
   authState$ = this.authService.authState;
-  currentUser = this.authService.user;
   authStateSubscription!: Subscription;
+  private router = inject(Router);
   @ViewChild('stepper') stepper!: MatStepper;
 
   ngOnInit(): void {
     this.authStateSubscription = this.authState$.subscribe(
       (user: User | null) => {
-        if (user) this.stepper.next();
+        if (user) {
+          this.isConnected = true;
+          this.stepper.next();
+        }
       }
     );
   }
@@ -276,17 +284,17 @@ export default class ShopRegisterComponent implements OnDestroy {
     name: new FormControl(
       '',
       [Validators.required],
-      [this.ffvs.alreadyExistInputValidator(shopCollection, 'id')]
+      [this.fs.alreadyExistInputValidator(this.fs.shopCollection, 'name')]
     ),
     description: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.email]),
     phone: new FormControl('', [Validators.pattern('^[0-9]*$')]),
   });
 
-  onSubmit(user: User) {
+  onSubmit() {
     this.isDisabledFormBtn = true;
     const formValue = this.shopRegister.value;
-    const { displayName, email, photoURL, uid } = user;
+    const { displayName, email, photoURL, uid } = this.currentUser!;
 
     const shop: Shop = {
       id: uid,
@@ -305,7 +313,8 @@ export default class ShopRegisterComponent implements OnDestroy {
     };
 
     this.fs.newShop(shop);
-    const notificationMsg = `${shop.name} enregistré avec succès, voici votre identifiant: ${shop.id}`;
-    this.snackBar.open(notificationMsg, 'OK');
+    const notificationMsg = `${shop.name} enregistré avec succès`;
+    this.snackBar.open(notificationMsg, 'OK', { duration: 10000 });
+    this.router.navigate(['/dashboard']);
   }
 }

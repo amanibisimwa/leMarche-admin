@@ -32,7 +32,6 @@ import { UtilityService } from 'src/app/core/services/utilities/utility.service'
 import { Timestamp } from '@angular/fire/firestore';
 import { MatDialog } from '@angular/material/dialog';
 import { NewArchiveComponent } from '../archive/new-archive.component';
-import { shopItemCol } from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-stock',
@@ -69,9 +68,6 @@ import { shopItemCol } from 'src/app/core/services/firebase/_firestore.collectio
   ],
 })
 export default class StockComponent {
-  newItemComponent = NewItemComponent;
-  itemCollection = shopItemCol;
-
   displayedColumns = [
     'position',
     'title',
@@ -92,6 +88,9 @@ export default class StockComponent {
   private us = inject(UtilityService);
   private dialog = inject(MatDialog);
 
+  newItemComponent = NewItemComponent;
+  itemCollection = this.fs.itemsCollection;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -100,7 +99,7 @@ export default class StockComponent {
 
   ngOnInit() {
     this.subscription = this.fs
-      .getCollectionData(shopItemCol)
+      .getCollectionData(this.itemCollection)
       .subscribe((docData) => {
         const items = docData as Item[];
         this.dataSource.data = items;

@@ -10,34 +10,39 @@ import {
   setDoc,
   where,
   docData,
-  updateDoc,
   getDoc,
 } from '@angular/fire/firestore';
 import { Item } from '../../models/item.model';
 import { Archieve } from '../../models/archive.model';
 import { Purchase } from '../../models/purchase.model';
 import { Sale } from '../../models/sale.model';
-import {
-  shopArchiveCol,
-  shopCollection,
-  shopItemCol,
-  shopPurchaseCol,
-  shopSaleCol,
-} from './_firestore.collection';
 import { Shop } from '../../models/shop.model';
+import { Auth } from '@angular/fire/auth';
+import { AbstractControl } from '@angular/forms';
+import { debounceTime, take, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirestoreService {
   private fs: Firestore = inject(Firestore);
+  private userId = inject(Auth).currentUser?.uid;
 
-  //Réference des sous collections de la collection "shops"
-  shopColRef = collection(this.fs, shopCollection);
-  itemColRef = collection(this.fs, shopItemCol);
-  archiveColRef = collection(this.fs, shopArchiveCol);
-  purchaseColRef = collection(this.fs, shopPurchaseCol);
-  saleColRef = collection(this.fs, shopSaleCol);
+  //Collection dans firestore
+  shopCollection = 'shops';
+  itemCategoryCollection = 'itemCategories';
+  itemsCollection = `${this.shopCollection}/${this.userId}/items`;
+  archiveCollection = `${this.shopCollection}/${this.userId}/archives`;
+  purchaseCollection = `${this.shopCollection}/${this.userId}/purchases`;
+  saleCollection = `${this.shopCollection}/${this.userId}/sales`;
+
+  //Réference de la collection "shops" et ces sous collections de
+  categoryColRef = collection(this.fs, this.itemCategoryCollection);
+  shopColRef = collection(this.fs, this.shopCollection);
+  itemColRef = collection(this.fs, this.itemsCollection);
+  archiveColRef = collection(this.fs, this.archiveCollection);
+  purchaseColRef = collection(this.fs, this.purchaseCollection);
+  saleColRef = collection(this.fs, this.saleCollection);
 
   //Générer un identifiant de document en local
   docId = (colName: string) => doc(collection(this.fs, colName)).id;
@@ -80,5 +85,18 @@ export class FirestoreService {
   deleteDocData(collectionName: string, docId: string) {
     const docRef = doc(this.fs, collectionName, docId);
     deleteDoc(docRef);
+  }
+
+  alreadyExistInputValidator(collectionName: string, fieldName: string) {
+    return (control: AbstractControl) => {
+      const value = control.value;
+      const collectionRef = collection(this.fs, collectionName);
+      const queryDoc = query(collectionRef, where(fieldName, '==', value));
+      return collectionData(queryDoc).pipe(
+        debounceTime(500),
+        take(1),
+        map((arr) => (arr.length ? { alreadyExist: true } : null))
+      );
+    };
   }
 }

@@ -17,8 +17,6 @@ import {
 })
 export class AuthService {
   private auth = inject(Auth);
-
-  user = user(this.auth);
   authState = authState(this.auth);
 
   loginWithGoogle() {

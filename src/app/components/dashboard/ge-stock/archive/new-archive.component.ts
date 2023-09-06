@@ -1,4 +1,4 @@
-import { Component, inject, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormControl,
@@ -17,10 +17,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
-import {
-  shopArchiveCol,
-  shopItemCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-new-archive',
@@ -52,7 +48,7 @@ import {
             #input
             maxlength="50"
           />
-          <mat-hint align="end">{{ input.value.length || 0 }}/25</mat-hint>
+          <mat-hint align="end">{{ input.value.length || 0 }}/50</mat-hint>
           <mat-error *ngIf="archiveForm.controls.reason.hasError('required')"
             >la raison est obligatoire</mat-error
           >
@@ -91,7 +87,7 @@ import {
   `,
   styles: [
     `
-      @use '../../../shared/styles/dialog-form.style' as *;
+      @use '../../../shared/styles/form-field.style' as *;
     `,
   ],
 })
@@ -113,7 +109,7 @@ export class NewArchiveComponent {
 
   onSubmit() {
     this.isDisabledBtn = true;
-    const archiveDocID = this.fs.docId(shopArchiveCol);
+    const archiveDocID = this.fs.docId(this.fs.archiveCollection);
     const formValue = this.archiveForm.value;
 
     const archieve: Archieve = {
@@ -132,7 +128,7 @@ export class NewArchiveComponent {
       this.snackBar.open(`Déstocké avec succès`, 'OK', { duration: 10000 });
     } else if (archieve.quantity === archieve.item.quantity) {
       this.fs.setArchive(archieve);
-      this.fs.deleteDocData(shopItemCol, this.item.id!);
+      this.fs.deleteDocData(this.fs.itemsCollection, this.item.id!);
       this.snackBar.open(`Tout a été déstocké avec succès`, 'OK', {
         duration: 10000,
       });

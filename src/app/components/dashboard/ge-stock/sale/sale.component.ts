@@ -26,7 +26,6 @@ import { FirestoreService } from 'src/app/core/services/firebase/firestore.servi
 import { MediaQueryObserverService } from 'src/app/core/services/utilities/media-query-observer.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
-import { shopSaleCol } from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-sale',
@@ -51,7 +50,8 @@ import { shopSaleCol } from 'src/app/core/services/firebase/_firestore.collectio
       @use '../../../shared/styles/data-table.style' as *;
 
       .isCanceled {
-        opacity: 0.3;
+        background: #fba5a526;
+        opacity: 0.5;
       }
     `,
   ],
@@ -67,9 +67,6 @@ import { shopSaleCol } from 'src/app/core/services/firebase/_firestore.collectio
   ],
 })
 export default class SaleComponent {
-  newSaleComponent = NewSaleComponent;
-  saleCollection = shopSaleCol;
-
   displayedColumns = [
     'position',
     'title',
@@ -88,6 +85,9 @@ export default class SaleComponent {
   private dialog = inject(MatDialog);
   dataSource = new MatTableDataSource<Sale>();
 
+  saleCollection = this.fs.saleCollection;
+  newSaleComponent = NewSaleComponent;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -96,7 +96,7 @@ export default class SaleComponent {
 
   ngOnInit() {
     this.subscription = this.fs
-      .getCollectionData(shopSaleCol)
+      .getCollectionData(this.saleCollection)
       .subscribe((docData) => {
         const sales = docData as Sale[];
         this.dataSource.data = sales;

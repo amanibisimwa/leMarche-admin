@@ -6,7 +6,6 @@ import { FirestoreService } from 'src/app/core/services/firebase/firestore.servi
 import { MediaQueryObserverService } from 'src/app/core/services/utilities/media-query-observer.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
-import { shopArchiveCol } from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-archive',
@@ -148,7 +147,7 @@ export default class ArchiveComponent {
   subscription!: Subscription;
   private fs = inject(FirestoreService);
   private us = inject(UtilityService);
-  dataSource = this.fs.getCollectionData(shopArchiveCol);
+  dataSource = this.fs.getCollectionData(this.fs.archiveCollection);
 
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
   formatedDate = (timestamp: Timestamp) => this.us.getFormatedDate(timestamp);

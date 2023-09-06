@@ -83,7 +83,7 @@ export default class LoginComponent {
       async (user: User | null) => {
         if (user) {
           if (await this.fs.shopExists(user.uid)) {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/']);
           } else {
             await this.authService.logout();
             this.snackBar.open(

@@ -21,15 +21,9 @@ import { ImagePickerComponent } from 'src/app/components/shared/components/image
 import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { StorageService } from 'src/app/core/services/firebase/storage.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
-import { FormFieldValidatorService } from 'src/app/core/services/firebase/form-field-validator.service';
 import { Item } from 'src/app/core/models/item.model';
 import { serverTimestamp } from '@angular/fire/firestore';
 import { Category } from 'src/app/core/models/item.category.model';
-import {
-  categoryCollection,
-  itemCol,
-  shopItemCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-new-item',
@@ -53,7 +47,7 @@ import {
   templateUrl: './new-item.component.html',
   styles: [
     `
-      @use '../../../../shared/styles/dialog-form.style' as *;
+      @use '../../../../shared/styles/form-field.style' as *;
 
       .margin-top {
         margin-top: 1rem;
@@ -67,9 +61,8 @@ export class NewItemComponent {
   private fs = inject(FirestoreService);
   private ss = inject(StorageService);
   private snackBar = inject(MatSnackBar);
-  private ffvs = inject(FormFieldValidatorService);
   imageUrls = this.ss.imageUrls;
-  categories$ = this.fs.getCollectionData(categoryCollection);
+  categories$ = this.fs.getCollectionData(this.fs.itemCategoryCollection);
   isOnline = this.uts.isOnline();
 
   readonly item: Item = inject(MAT_DIALOG_DATA);
@@ -87,7 +80,7 @@ export class NewItemComponent {
       : new FormControl(
           '',
           [Validators.required],
-          [this.ffvs.alreadyExistInputValidator(itemCol, 'id', true)]
+          [this.fs.alreadyExistInputValidator(this.fs.itemsCollection, 'id')]
         ),
     title: new FormControl('', [Validators.required]),
     description: new FormControl('', [Validators.required]),

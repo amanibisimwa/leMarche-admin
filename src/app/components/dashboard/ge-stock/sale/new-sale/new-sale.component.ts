@@ -20,10 +20,6 @@ import { Item } from 'src/app/core/models/item.model';
 import { Sale } from 'src/app/core/models/sale.model';
 import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { serverTimestamp } from '@angular/fire/firestore';
-import {
-  shopItemCol,
-  shopSaleCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
 
 @Component({
   selector: 'app-new-sale',
@@ -44,7 +40,7 @@ import {
   templateUrl: './new-sale.component.html',
   styles: [
     `
-      @use '../../../../shared/styles/dialog-form.style' as *;
+      @use '../../../../shared/styles/form-field.style' as *;
     `,
   ],
 })
@@ -60,15 +56,17 @@ export class NewSaleComponent {
   private _itemFilter(itemTitle: string, items: Item[]) {
     const filterValue = itemTitle.toLowerCase();
     return items.filter((item) => {
-      this.saleForm.controls['sellingPrice'].setValue(
-        this.stockItemSellingPrice!
-      );
+      this.saleForm.patchValue({
+        sellingPrice: item.sellingPrice,
+      });
       return item.title.toLowerCase().includes(filterValue);
     });
   }
 
   ngOnInit(): void {
-    const items$ = this.fs.getCollectionData(shopItemCol) as Observable<Item[]>;
+    const items$ = this.fs.getCollectionData(
+      this.fs.itemsCollection
+    ) as Observable<Item[]>;
 
     this.itemSub = items$.subscribe((items) => {
       this.filteredItems = this.saleForm.controls['item'].valueChanges.pipe(
@@ -93,13 +91,9 @@ export class NewSaleComponent {
     ]),
   });
 
-  get stockItemSellingPrice() {
-    return this.saleForm.value.item?.sellingPrice;
-  }
-
   onSubmit() {
     this.isDisabledBtn = true;
-    const saleDocID = this.fs.docId(shopSaleCol);
+    const saleDocID = this.fs.docId(this.fs.saleCollection);
     const formValue = this.saleForm.value;
 
     const sale: Sale = {
