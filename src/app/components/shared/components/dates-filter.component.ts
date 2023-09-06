@@ -18,9 +18,8 @@ import {
 } from '@angular/material/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { UtilityService } from 'src/app/core/services/utilities/utility.service';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
 import { Subscription } from 'rxjs';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 
 @Component({
   selector: 'app-dates-filter',
@@ -100,7 +99,7 @@ export class DatesFilterComponent {
   subscription!: Subscription;
   private dateAdapter = inject(DateAdapter<Date>);
   private dialogData = inject(MAT_DIALOG_DATA);
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
 
   ngOnInit(): void {
     this.dateAdapter.setLocale('fr');
@@ -115,7 +114,7 @@ export class DatesFilterComponent {
     this.isDisabledBtn = true;
     const formValue = this.dateRangeForm.value;
     const colName = this.dialogData.collectionName;
-    this.subscription = this.gs
+    this.subscription = this.fs
       .queryByDateRange(formValue.start!, formValue.end!, colName)
       .subscribe((items) => {
         this.dialogData.tableDataSource.data = items;

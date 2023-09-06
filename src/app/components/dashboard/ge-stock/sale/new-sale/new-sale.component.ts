@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,11 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription, Observable, startWith, map } from 'rxjs';
 import { Item } from 'src/app/core/models/item.model';
 import { Sale } from 'src/app/core/models/sale.model';
-import {
-  itemCol,
-  saleCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { serverTimestamp } from '@angular/fire/firestore';
 
 @Component({
@@ -44,16 +40,15 @@ import { serverTimestamp } from '@angular/fire/firestore';
   templateUrl: './new-sale.component.html',
   styles: [
     `
-      @use '../../../../shared/styles/dialog-form.style' as *;
+      @use '../../../../shared/styles/form-field.style' as *;
     `,
   ],
 })
 export class NewSaleComponent {
   isDisabledBtn = false;
-  private gs = inject(GeStockService);
-  private snackBar = inject(MatSnackBar);
-  readonly sale: Sale = inject(MAT_DIALOG_DATA);
   itemSub?: Subscription;
+  private fs = inject(FirestoreService);
+  private snackBar = inject(MatSnackBar);
 
   filteredItems?: Observable<Item[]>;
   displayFn = (item: Item) => (item ? item.title : '');
@@ -61,15 +56,17 @@ export class NewSaleComponent {
   private _itemFilter(itemTitle: string, items: Item[]) {
     const filterValue = itemTitle.toLowerCase();
     return items.filter((item) => {
-      this.saleForm.controls['sellingPrice'].setValue(
-        this.stockItemSellingPrice!
-      );
+      this.saleForm.patchValue({
+        sellingPrice: item.sellingPrice,
+      });
       return item.title.toLowerCase().includes(filterValue);
     });
   }
 
   ngOnInit(): void {
-    const items$ = this.gs.getCollectionData(itemCol) as Observable<Item[]>;
+    const items$ = this.fs.getCollectionData(
+      this.fs.itemsCollection
+    ) as Observable<Item[]>;
 
     this.itemSub = items$.subscribe((items) => {
       this.filteredItems = this.saleForm.controls['item'].valueChanges.pipe(
@@ -94,13 +91,9 @@ export class NewSaleComponent {
     ]),
   });
 
-  get stockItemSellingPrice() {
-    return this.saleForm.value.item?.sellingPrice;
-  }
-
   onSubmit() {
     this.isDisabledBtn = true;
-    const saleDocID = this.gs.docId(saleCol);
+    const saleDocID = this.fs.docId(this.fs.saleCollection);
     const formValue = this.saleForm.value;
 
     const sale: Sale = {
@@ -112,15 +105,15 @@ export class NewSaleComponent {
     };
 
     if (typeof sale.item === 'object') {
-      //Modification de l'article en Stock
-      sale.item.sellingPrice = Number(formValue.sellingPrice);
-      sale.item.created = sale.created;
-      sale.item.quantity -= sale.quantity;
-      //Enregistrement de modification de l'article
-      //Enregistrement de la nouvelle vente ou sa modification
       if (sale.item.quantity > 0) {
-        this.gs.setItem(sale.item);
-        this.gs.setSale(sale);
+        //Modification de l'article en Stock
+        sale.item.sellingPrice = Number(formValue.sellingPrice);
+        sale.item.created = sale.created;
+        sale.item.quantity -= sale.quantity;
+        //Enregistrement de modification de l'article
+        //Enregistrement de la nouvelle vente ou sa modification
+        this.fs.setItem(sale.item);
+        this.fs.setSale(sale);
         const notificationMsg = `${sale.item.title} vendu avec succès`;
         this.snackBar.open(notificationMsg, '', { duration: 10000 });
       } else {

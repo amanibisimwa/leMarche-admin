@@ -50,40 +50,23 @@
         <td mat-cell *matCellDef="let sale" class="truncate-cell">
           {{ sale.item.title }}
         </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        ></td>
+        <td mat-footer-cell *matFooterCellDef>
+          {{
+            (viewPoint$ | async) === "Small"
+              ? "Total"
+              : (viewPoint$ | async) === "XSmall"
+              ? "Total"
+              : ""
+          }}
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="quantity">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
-        >
-          Quantité
-        </th>
-        <td
-          mat-cell
-          *matCellDef="let sale"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
-        >
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Quantité</th>
+        <td mat-cell *matCellDef="let sale">
           {{ sale.quantity | number }}
         </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        ></td>
+        <td mat-footer-cell *matFooterCellDef></td>
       </ng-container>
 
       <ng-container matColumnDef="sellingPrice">
@@ -91,14 +74,20 @@
           mat-header-cell
           *matHeaderCellDef
           mat-sort-header
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           Prix unitaire
         </th>
         <td
           mat-cell
           *matCellDef="let sale"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           {{ sale.item.sellingPrice | number }}
         </td>
@@ -112,53 +101,26 @@
         ></td>
       </ng-container>
 
-      <ng-container matColumnDef="sellingTotalPrice">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          PV Total
-        </th>
-        <td
-          mat-cell
-          *matCellDef="let sale"
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          {{ sale.item.sellingPrice * sale.quantity | number }}
-        </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        >
-          {{ saleTotalSum() | number }}$
-        </td>
-      </ng-container>
-
       <ng-container matColumnDef="profit">
         <th
           mat-header-cell
           *matHeaderCellDef
           mat-sort-header
           matTooltip="Bénéfice unitaire"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           Bénéfice
         </th>
         <td
           mat-cell
           *matCellDef="let sale"
-          [hidden]="(viewPoint$ | async) === 'XSmall'"
+          [hidden]="
+            (viewPoint$ | async) === 'Small' ||
+            (viewPoint$ | async) === 'XSmall'
+          "
         >
           {{ sale.item.sellingPrice - sale.item.purchasePrice | number }}
         </td>
@@ -172,25 +134,29 @@
         ></td>
       </ng-container>
 
+      <ng-container matColumnDef="sellingTotalPrice">
+        <th mat-header-cell *matHeaderCellDef>PV Total</th>
+        <td mat-cell *matCellDef="let sale">
+          {{ sale.item.sellingPrice * sale.quantity | number }}
+        </td>
+        <td mat-footer-cell *matFooterCellDef>
+          {{ saleTotalSum() | number }}$
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="totalProfit">
         <th
           mat-header-cell
           *matHeaderCellDef
           matTooltip="Bénéfice total"
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
           B Total
         </th>
         <td
           mat-cell
           *matCellDef="let sale"
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
           {{
             (sale.item.sellingPrice - sale.item.purchasePrice) * sale.quantity
@@ -200,10 +166,7 @@
         <td
           mat-footer-cell
           *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
+          [hidden]="(viewPoint$ | async) === 'XSmall'"
         >
           {{ profitTotalSum() | number }}$
         </td>
@@ -221,14 +184,7 @@
             <mat-icon>cancel</mat-icon>
           </button>
         </td>
-        <td
-          mat-footer-cell
-          *matFooterCellDef
-          [hidden]="
-            (viewPoint$ | async) === 'Small' ||
-            (viewPoint$ | async) === 'XSmall'
-          "
-        ></td>
+        <td mat-footer-cell *matFooterCellDef></td>
       </ng-container>
 
       <ng-container matColumnDef="expandedDetail">
@@ -319,6 +275,8 @@
         *matRowDef="let sale; columns: displayedColumns"
         class="item-row"
         [class.expanded-row]="expandedSale === sale"
+        [class.isCanceled]="sale.isCanceled"
+        [matTooltip]="sale.isCanceled ? 'Cette vente a été annulée' : ''"
         (click)="expandedSale = expandedSale === sale ? null : sale"
       ></tr>
 

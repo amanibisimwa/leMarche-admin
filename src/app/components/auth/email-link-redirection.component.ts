@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { User } from '@angular/fire/auth';
 import { appTitle } from 'src/app/app.config';
 import { Router } from '@angular/router';
-import { ShopService } from 'src/app/core/services/firebase/shop.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 
 @Component({
   selector: 'app-email-link-redirection',
@@ -33,17 +33,14 @@ export default class EmailLinkRedirectionComponent {
   authStateSubscription?: Subscription;
   private router = inject(Router);
   private authService = inject(AuthService);
-  private ss = inject(ShopService);
+  private fs = inject(FirestoreService);
   authState$ = this.authService.authState;
 
   ngOnInit(): void {
     this.authService.loginWithEmailLink();
     this.authStateSubscription = this.authState$.subscribe(
-      (user: User | null) => {
+      async (user: User | null) => {
         if (user) {
-          this.authService.newUser();
-          localStorage.removeItem('emailForSignIn');
-          this.router.navigate(['/dashboard']);
         }
       }
     );

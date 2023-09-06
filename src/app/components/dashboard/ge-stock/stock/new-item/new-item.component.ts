@@ -18,17 +18,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ImagePickerComponent } from 'src/app/components/shared/components/image-picker.component';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { StorageService } from 'src/app/core/services/firebase/storage.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
-import { FormFieldValidatorService } from 'src/app/core/services/firebase/form-field-validator.service';
-import {
-  categoryCol,
-  itemCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
 import { Item } from 'src/app/core/models/item.model';
 import { serverTimestamp } from '@angular/fire/firestore';
-import { Category } from 'src/app/core/models/shop.category.model';
+import { Category } from 'src/app/core/models/item.category.model';
 
 @Component({
   selector: 'app-new-item',
@@ -52,7 +47,7 @@ import { Category } from 'src/app/core/models/shop.category.model';
   templateUrl: './new-item.component.html',
   styles: [
     `
-      @use '../../../../shared/styles/dialog-form.style' as *;
+      @use '../../../../shared/styles/form-field.style' as *;
 
       .margin-top {
         margin-top: 1rem;
@@ -63,12 +58,11 @@ import { Category } from 'src/app/core/models/shop.category.model';
 export class NewItemComponent {
   isDisabledBtn = false;
   private uts = inject(UtilityService);
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private ss = inject(StorageService);
   private snackBar = inject(MatSnackBar);
-  private ffvs = inject(FormFieldValidatorService);
   imageUrls = this.ss.imageUrls;
-  categories$ = this.gs.getCollectionData(categoryCol);
+  categories$ = this.fs.getCollectionData(this.fs.itemCategoryCollection);
   isOnline = this.uts.isOnline();
 
   readonly item: Item = inject(MAT_DIALOG_DATA);
@@ -86,7 +80,7 @@ export class NewItemComponent {
       : new FormControl(
           '',
           [Validators.required],
-          [this.ffvs.alreadyExistInputValidator(itemCol, 'id', false)]
+          [this.fs.alreadyExistInputValidator(this.fs.itemsCollection, 'id')]
         ),
     title: new FormControl('', [Validators.required]),
     description: new FormControl('', [Validators.required]),
@@ -132,7 +126,7 @@ export class NewItemComponent {
       created: serverTimestamp(),
     };
 
-    this.gs.setItem(item);
+    this.fs.setItem(item);
     const notificationMsg = `${item.title} enregistré avec succès`;
     this.snackBar.open(notificationMsg, '', { duration: 5000 });
   }

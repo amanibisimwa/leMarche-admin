@@ -1,4 +1,4 @@
-import { Component, inject, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormControl,
@@ -16,11 +16,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
-import {
-  archiveCol,
-  itemCol,
-} from 'src/app/core/services/firebase/_firestore.collection';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 
 @Component({
   selector: 'app-new-archive',
@@ -52,7 +48,7 @@ import {
             #input
             maxlength="50"
           />
-          <mat-hint align="end">{{ input.value.length || 0 }}/25</mat-hint>
+          <mat-hint align="end">{{ input.value.length || 0 }}/50</mat-hint>
           <mat-error *ngIf="archiveForm.controls.reason.hasError('required')"
             >la raison est obligatoire</mat-error
           >
@@ -91,13 +87,13 @@ import {
   `,
   styles: [
     `
-      @use '../../../shared/styles/dialog-form.style' as *;
+      @use '../../../shared/styles/form-field.style' as *;
     `,
   ],
 })
 export class NewArchiveComponent {
   isDisabledBtn = false;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private snackBar = inject(MatSnackBar);
   public item = inject(MAT_DIALOG_DATA);
 
@@ -113,7 +109,7 @@ export class NewArchiveComponent {
 
   onSubmit() {
     this.isDisabledBtn = true;
-    const archiveDocID = this.gs.docId(archiveCol);
+    const archiveDocID = this.fs.docId(this.fs.archiveCollection);
     const formValue = this.archiveForm.value;
 
     const archieve: Archieve = {
@@ -127,12 +123,12 @@ export class NewArchiveComponent {
     if (archieve.quantity < archieve.item.quantity) {
       archieve.item.quantity -= archieve.quantity;
       archieve.item.created = archieve.created;
-      this.gs.setArchive(archieve);
-      this.gs.setItem(archieve.item);
+      this.fs.setArchive(archieve);
+      this.fs.setItem(archieve.item);
       this.snackBar.open(`Déstocké avec succès`, 'OK', { duration: 10000 });
     } else if (archieve.quantity === archieve.item.quantity) {
-      this.gs.setArchive(archieve);
-      this.gs.deleteDocData(itemCol, this.item.id!);
+      this.fs.setArchive(archieve);
+      this.fs.deleteDocData(this.fs.itemsCollection, this.item.id!);
       this.snackBar.open(`Tout a été déstocké avec succès`, 'OK', {
         duration: 10000,
       });

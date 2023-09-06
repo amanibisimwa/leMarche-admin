@@ -1,7 +1,6 @@
 import { Component, ViewChild, inject } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { NewPurchaseComponent } from './new-purchase/new-purchase.component';
-import { purchaseCol } from 'src/app/core/services/firebase/_firestore.collection';
 import {
   trigger,
   state,
@@ -15,7 +14,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Subscription } from 'rxjs';
 import { Purchase } from 'src/app/core/models/purchase.model';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { MediaQueryObserverService } from 'src/app/core/services/utilities/media-query-observer.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
@@ -62,26 +61,25 @@ import { MatDividerModule } from '@angular/material/divider';
   ],
 })
 export default class PurchaseComponent {
-  newPurchaseComponent = NewPurchaseComponent;
-  purchaseCollection = purchaseCol;
-
   displayedColumns = [
     'position',
     'title',
     'quantity',
     'purchasePrice',
-    'purchaseTotalPrice',
     'profit',
+    'purchaseTotalPrice',
     'totalProfit',
     'action',
   ];
 
   expandedPurchase?: Purchase | null;
   subscription!: Subscription;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private us = inject(UtilityService);
   private dialog = inject(MatDialog);
   dataSource = new MatTableDataSource<Purchase>();
+  newPurchaseComponent = NewPurchaseComponent;
+  purchaseCollection = this.fs.purchaseCollection;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -90,8 +88,8 @@ export default class PurchaseComponent {
   formatedDate = (timestamp: Timestamp) => this.us.getFormatedDate(timestamp);
 
   ngOnInit() {
-    this.subscription = this.gs
-      .getCollectionData(purchaseCol)
+    this.subscription = this.fs
+      .getCollectionData(this.purchaseCollection)
       .subscribe((docData) => {
         const purchases = docData as Purchase[];
         this.dataSource.data = purchases;

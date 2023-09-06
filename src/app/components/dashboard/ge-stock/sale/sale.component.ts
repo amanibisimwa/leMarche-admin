@@ -18,12 +18,11 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HeaderTableActionComponent } from 'src/app/components/shared/components/header-table-action.component';
 import { NewSaleComponent } from './new-sale/new-sale.component';
-import { saleCol } from 'src/app/core/services/firebase/_firestore.collection';
 import { Sale } from 'src/app/core/models/sale.model';
 import { CancelSaleComponent } from './cancel-sale.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
-import { GeStockService } from 'src/app/core/services/firebase/ge-stock.service';
+import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
 import { MediaQueryObserverService } from 'src/app/core/services/utilities/media-query-observer.service';
 import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { Timestamp } from '@angular/fire/firestore';
@@ -49,6 +48,11 @@ import { Timestamp } from '@angular/fire/firestore';
   styles: [
     `
       @use '../../../shared/styles/data-table.style' as *;
+
+      .isCanceled {
+        background: #fba5a526;
+        opacity: 0.5;
+      }
     `,
   ],
   animations: [
@@ -63,26 +67,26 @@ import { Timestamp } from '@angular/fire/firestore';
   ],
 })
 export default class SaleComponent {
-  newSaleComponent = NewSaleComponent;
-  saleCollection = saleCol;
-
   displayedColumns = [
     'position',
     'title',
     'quantity',
     'sellingPrice',
-    'sellingTotalPrice',
     'profit',
+    'sellingTotalPrice',
     'totalProfit',
     'action',
   ];
 
   expandedSale?: Sale | null;
   subscription!: Subscription;
-  private gs = inject(GeStockService);
+  private fs = inject(FirestoreService);
   private us = inject(UtilityService);
   private dialog = inject(MatDialog);
   dataSource = new MatTableDataSource<Sale>();
+
+  saleCollection = this.fs.saleCollection;
+  newSaleComponent = NewSaleComponent;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -91,8 +95,8 @@ export default class SaleComponent {
   formatedDate = (timestamp: Timestamp) => this.us.getFormatedDate(timestamp);
 
   ngOnInit() {
-    this.subscription = this.gs
-      .getCollectionData(saleCol)
+    this.subscription = this.fs
+      .getCollectionData(this.saleCollection)
       .subscribe((docData) => {
         const sales = docData as Sale[];
         this.dataSource.data = sales;
