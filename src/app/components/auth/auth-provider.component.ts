@@ -12,6 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from 'src/app/core/services/firebase/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-auth-provider',
@@ -23,6 +24,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatInputModule,
     MatFormFieldModule,
     ReactiveFormsModule,
+    MatIconModule,
   ],
   template: `
     <form [formGroup]="emailLinkForm">
@@ -64,10 +66,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
       <button
         class="btn google-auth"
-        mat-flat-button
+        mat-fab
+        extended
         color="primary"
         (click)="loginWithGoogle()"
       >
+        <mat-icon>login</mat-icon>
         Connectez-vous avec Google
       </button>
     </form>

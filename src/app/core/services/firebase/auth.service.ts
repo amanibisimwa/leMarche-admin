@@ -18,6 +18,7 @@ import {
 export class AuthService {
   private auth = inject(Auth);
   authState = authState(this.auth);
+  user = user(this.auth);
 
   loginWithGoogle() {
     return signInWithPopup(this.auth, new GoogleAuthProvider());

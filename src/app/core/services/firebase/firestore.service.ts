@@ -26,15 +26,15 @@ import { debounceTime, take, map } from 'rxjs/operators';
 })
 export class FirestoreService {
   private fs: Firestore = inject(Firestore);
-  private userId = inject(Auth).currentUser?.uid;
+  private auth = inject(Auth);
 
   //Collection dans firestore
   shopCollection = 'shops';
   itemCategoryCollection = 'itemCategories';
-  itemsCollection = `${this.shopCollection}/${this.userId}/items`;
-  archiveCollection = `${this.shopCollection}/${this.userId}/archives`;
-  purchaseCollection = `${this.shopCollection}/${this.userId}/purchases`;
-  saleCollection = `${this.shopCollection}/${this.userId}/sales`;
+  itemsCollection = `${this.shopCollection}/${this.auth.currentUser?.uid}/items`;
+  archiveCollection = `${this.shopCollection}/${this.auth.currentUser?.uid}/archives`;
+  purchaseCollection = `${this.shopCollection}/${this.auth.currentUser?.uid}/purchases`;
+  saleCollection = `${this.shopCollection}/${this.auth.currentUser?.uid}/sales`;
 
   //Réference de la collection "shops" et ces sous collections de
   categoryColRef = collection(this.fs, this.itemCategoryCollection);

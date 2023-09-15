@@ -59,7 +59,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         width="35"
         height="35"
         [ngSrc]="
-          currentUser?.photoURL ??
+          (user$ | async)?.photoURL ??
           'https://images.vexels.com/content/145908/preview/male-avatar-maker-2a7919.png'
         "
         alt="Image de profile LeMarché admin"
@@ -216,7 +216,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export default class DashboardComponent {
   appName = appTitle;
   private authService = inject(AuthService);
-  readonly currentUser = inject(Auth).currentUser;
+  user$ = this.authService.user;
   private router = inject(Router);
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
   private sts = inject(SwitchThemeService);

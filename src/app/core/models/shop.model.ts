@@ -7,6 +7,6 @@ export interface Shop {
   email: string;
   phone: string;
   logoUrlImg?: string;
-  owner?: Partial<User>;
+  owner: Partial<User>;
   created: any;
 }
