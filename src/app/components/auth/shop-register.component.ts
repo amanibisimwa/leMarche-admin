@@ -22,7 +22,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { appTitle } from 'src/app/app.config';
 import { AuthService } from 'src/app/core/services/firebase/auth.service';
-import { AuthProviderComponent } from './auth-provider.component';
+import { AuthProviderComponent } from './auth-providers.component';
 import { Router, RouterModule } from '@angular/router';
 import { User } from '@angular/fire/auth';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -43,7 +43,9 @@ import { LetDirective } from '@ngrx/component';
           ></mat-card-subtitle
         >
       </mat-card-header>
-      <mat-divider class="divider-header">></mat-divider>
+
+      <mat-divider class="divider-header"></mat-divider>
+
       <mat-card-content class="login-container" class="mat-step-header">
         <mat-stepper linear #stepper>
           <mat-step label="Connectez-vous" [editable]="!isLogIn">

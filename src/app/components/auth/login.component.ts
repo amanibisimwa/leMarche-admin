@@ -13,7 +13,7 @@ import { AuthService } from 'src/app/core/services/firebase/auth.service';
 import { appTitle } from 'src/app/app.config';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
-import { AuthProviderComponent } from './auth-provider.component';
+import { AuthProviderComponent } from './auth-providers.component';
 
 @Component({
   selector: 'app-login',
