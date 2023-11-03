@@ -27,7 +27,24 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule,
   ],
   template: `
-    <form [formGroup]="emailLinkForm">
+    <button
+      class="google-auth-btn"
+      mat-fab
+      extended
+      color="primary"
+      (click)="loginWithGoogle()"
+    >
+      <mat-icon>login</mat-icon>
+      Connectez-vous avec Google
+    </button>
+
+    <div class="divider">
+      <mat-divider></mat-divider>
+      <span>ou</span>
+      <mat-divider></mat-divider>
+    </div>
+
+    <form [formGroup]="emailLinkForm" align="end">
       <mat-form-field appearance="outline" class="email-field">
         <mat-label>Email</mat-label>
         <input
@@ -49,7 +66,7 @@ import { MatIconModule } from '@angular/material/icon';
       </mat-form-field>
 
       <button
-        class="btn email-auth"
+        class="email-auth-btn"
         mat-stroked-button
         (click)="onEmailLinkFormSubmit()"
         color="primary"
@@ -57,37 +74,24 @@ import { MatIconModule } from '@angular/material/icon';
       >
         Connexion
       </button>
-
-      <div class="divider">
-        <mat-divider></mat-divider>
-        <span>ou</span>
-        <mat-divider></mat-divider>
-      </div>
-
-      <button
-        class="btn google-auth"
-        mat-fab
-        extended
-        color="primary"
-        (click)="loginWithGoogle()"
-      >
-        <mat-icon>login</mat-icon>
-        Connectez-vous avec Google
-      </button>
     </form>
   `,
   styles: [
     `
+      .google-auth-btn {
+        width: 100%;
+        box-shadow: none;
+      }
+
+      form {
+        border: 1px solid gray;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+
       mat-form-field {
         width: 100%;
-        margin: 0.1rem;
       }
-
-      .btn {
-        width: 100%;
-        pointer-events: initial;
-      }
-
       .divider {
         display: flex;
         justify-content: space-between;
