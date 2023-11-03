@@ -22,10 +22,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { appTitle } from 'src/app/app.config';
 import { AuthService } from 'src/app/core/services/firebase/auth.service';
-import { AuthProviderComponent } from './auth-provider.component';
+import { AuthProviderComponent } from './auth-providers.component';
 import { Router, RouterModule } from '@angular/router';
-import { Auth, User } from '@angular/fire/auth';
+import { User } from '@angular/fire/auth';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { LetDirective } from '@ngrx/component';
 
 @Component({
   selector: 'app-shop-register',
@@ -42,10 +43,12 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
           ></mat-card-subtitle
         >
       </mat-card-header>
-      <mat-divider class="divider-header">></mat-divider>
+
+      <mat-divider class="divider-header"></mat-divider>
+
       <mat-card-content class="login-container" class="mat-step-header">
         <mat-stepper linear #stepper>
-          <mat-step label="Connectez-vous" [editable]="!isConnected">
+          <mat-step label="Connectez-vous" [editable]="!isLogIn">
             <app-auth-provider />
           </mat-step>
           <mat-step label="Enregistrez votre shop">
@@ -147,11 +150,11 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
                 </div>
               </div>
               <mat-divider></mat-divider>
-              <div class="action" align="end">
+              <div class="action" align="end" *ngrxLet="user$ as user">
                 <button
                   mat-flat-button
                   color="primary"
-                  (click)="onSubmit()"
+                  (click)="onSubmit(user)"
                   [disabled]="
                     isDisabledFormBtn ||
                     isCroppedImgPending ||
@@ -228,21 +231,22 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     RouterModule,
     MatProgressBarModule,
     AuthProviderComponent,
+    LetDirective,
   ],
 })
 export default class ShopRegisterComponent implements OnDestroy {
   appName = appTitle;
   croppedImage = '';
   isCroppedImgPending = false;
-  isConnected = false;
+  isLogIn = false;
   dialogSubs!: Subscription;
   isDisabledFormBtn = false;
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private uts = inject(UtilityService);
   private fs = inject(FirestoreService);
-  private currentUser = inject(Auth).currentUser;
   private authService = inject(AuthService);
+  user$ = this.authService.user;
   authState$ = this.authService.authState;
   authStateSubscription!: Subscription;
   private router = inject(Router);
@@ -250,10 +254,14 @@ export default class ShopRegisterComponent implements OnDestroy {
 
   ngOnInit(): void {
     this.authStateSubscription = this.authState$.subscribe(
-      (user: User | null) => {
+      async (user: User | null) => {
         if (user) {
-          this.isConnected = true;
-          this.stepper.next();
+          if (await this.fs.shopExists(user.uid)) {
+            this.router.navigate(['/']);
+          } else {
+            this.isLogIn = true;
+            this.stepper.next();
+          }
         }
       }
     );
@@ -291,10 +299,10 @@ export default class ShopRegisterComponent implements OnDestroy {
     phone: new FormControl('', [Validators.pattern('^[0-9]*$')]),
   });
 
-  onSubmit() {
+  onSubmit(user: User | null) {
     this.isDisabledFormBtn = true;
     const formValue = this.shopRegister.value;
-    const { displayName, email, photoURL, uid } = this.currentUser!;
+    const { displayName, email, photoURL, uid } = user!;
 
     const shop: Shop = {
       id: uid,

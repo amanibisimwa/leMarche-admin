@@ -3,7 +3,6 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { AuthService } from 'src/app/core/services/firebase/auth.service';
-import { UtilityService } from 'src/app/core/services/utilities/utility.service';
 import { MediaQueryObserverService } from 'src/app/core/services/utilities/media-query-observer.service';
 import { SwitchThemeService } from 'src/app/core/services/utilities/switch-theme.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,8 +14,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { appTitle } from 'src/app/app.config';
 import { Subscription } from 'rxjs';
 import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
-import { Auth, User } from '@angular/fire/auth';
+import { User } from '@angular/fire/auth';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { LetDirective } from '@ngrx/component';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,6 +33,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatTooltipModule,
     NgOptimizedImage,
     MatSnackBarModule,
+    LetDirective,
   ],
   template: `<div class="dashboard-container">
     <mat-toolbar>
@@ -49,9 +50,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         >
           <mat-icon>menu</mat-icon>
         </button>
-        <a mat-button href="/ge-stock"
-          ><h1>{{ appName }}</h1></a
-        >
+        <a mat-button href="/ge-stock">{{ appName }}</a>
       </div>
       <img
         [matTooltip]="'Menu de ' + appName"
@@ -59,7 +58,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         width="35"
         height="35"
         [ngSrc]="
-          currentUser?.photoURL ??
+          (user$ | async)?.photoURL ??
           'https://images.vexels.com/content/145908/preview/male-avatar-maker-2a7919.png'
         "
         alt="Image de profile LeMarché admin"
@@ -114,7 +113,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
           routerLinkActive="active"
           #rla="routerLinkActive"
           [color]="rla.isActive ? 'primary' : 'no-color'"
-          *ngIf="viewPoint$ | async as vw"
+          *ngrxLet="viewPoint$ as vw"
           (click)="toggleDrawer(drawer, vw)"
         >
           <mat-icon>inventory_2</mat-icon>
@@ -129,7 +128,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
           routerLinkActive="active"
           #rla="routerLinkActive"
           [color]="rla.isActive ? 'primary' : 'no-color'"
-          *ngIf="viewPoint$ | async as vw"
+          *ngrxLet="viewPoint$ as vw"
           (click)="toggleDrawer(drawer, vw)"
         >
           <mat-icon>attach_money</mat-icon>
@@ -144,7 +143,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
           routerLinkActive="active"
           #rla="routerLinkActive"
           [color]="rla.isActive ? 'primary' : 'no-color'"
-          *ngIf="viewPoint$ | async as vw"
+          *ngrxLet="viewPoint$ as vw"
           (click)="toggleDrawer(drawer, vw)"
         >
           <mat-icon>settings</mat-icon>
@@ -163,12 +162,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         height: 100vh;
         display: flex;
         flex-direction: column;
-      }
-
-      .toolbar-container {
-        position: sticky;
-        top: 0%;
-        z-index: 2;
       }
 
       mat-toolbar {
@@ -216,7 +209,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 export default class DashboardComponent {
   appName = appTitle;
   private authService = inject(AuthService);
-  readonly currentUser = inject(Auth).currentUser;
+  user$ = this.authService.user;
   private router = inject(Router);
   viewPoint$ = inject(MediaQueryObserverService).mediaQuery();
   private sts = inject(SwitchThemeService);

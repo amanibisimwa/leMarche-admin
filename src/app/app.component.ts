@@ -31,13 +31,13 @@ export class AppComponent {
         const isLightOn = matchMedia('(prefers-color-scheme: light)').matches;
         this.setDeviceTheme(isLightOn);
 
-        // Watch for changes of the preference
+        // Surveillez les changements de préférence
         matchMedia('(prefers-color-scheme: light)').addEventListener(
           'change',
           (e) => {
             this.setDeviceTheme(e.matches);
 
-            // Trigger refresh of UI
+            // Déclenche l'actualisation de l'interface utilisateur
             this.ref.tick();
           }
         );

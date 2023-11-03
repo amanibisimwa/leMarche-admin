@@ -18,12 +18,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatDatepickerModule,
   ],
   template: `<main class="children-container">
-    <nav
-      mat-tab-nav-bar
-      mat-stretch-tabs="false"
-      mat-align-tabs="center"
-      [tabPanel]="tabPanel"
-    >
+    <nav mat-tab-nav-bar mat-stretch-tabs="false" mat-align-tabs="center">
       <a
         mat-tab-link
         *ngFor="let link of links"
@@ -34,7 +29,6 @@ import { MatNativeDateModule } from '@angular/material/core';
         {{ link.name }}
       </a>
     </nav>
-    <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
     <mat-divider></mat-divider>
     <router-outlet></router-outlet>
   </main>`,
