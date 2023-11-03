@@ -46,10 +46,6 @@ import { AuthProviderComponent } from './auth-providers.component';
       .mat-divider {
         margin: 1rem 0;
       }
-
-      mat-form-field {
-        width: 100%;
-      }
     `,
   ],
   imports: [

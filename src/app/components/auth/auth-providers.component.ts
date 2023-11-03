@@ -11,8 +11,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from 'src/app/core/services/firebase/auth.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-auth-provider',
@@ -92,6 +92,7 @@ import { MatIconModule } from '@angular/material/icon';
       mat-form-field {
         width: 100%;
       }
+
       .divider {
         display: flex;
         justify-content: space-between;
@@ -107,7 +108,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class AuthProviderComponent {
   private authService = inject(AuthService);
-  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
   emailLinkForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -125,8 +126,6 @@ export class AuthProviderComponent {
 
     this.authService.sendAuthLink(email, actionCodeSettings);
     localStorage.setItem('emailForSignIn', email);
-    const notificationMsg = `Le lien d'authentification vous a été envoyé à l'adresse "${email}"`;
-    this.snackBar.open(notificationMsg, 'OK');
-    this.emailLinkForm.reset();
+    this.router.navigate(['email-link-redirection']);
   }
 }
