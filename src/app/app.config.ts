@@ -3,7 +3,6 @@ import {
   PreloadAllModules,
   provideRouter,
   withPreloading,
-  withRouterConfig,
 } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -28,10 +27,9 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     importProvidersFrom(
-      provideFirebaseApp(() => initializeApp(environment.firebase))
-    ),
-    importProvidersFrom(provideAuth(() => getAuth())),
-    importProvidersFrom(
+      provideFirebaseApp(() => initializeApp(environment.firebase)),
+      provideAuth(() => getAuth()),
+      provideStorage(() => getStorage()),
       provideFirestore(() =>
         initializeFirestore(getApp(), {
           localCache: persistentLocalCache({
@@ -40,6 +38,5 @@ export const appConfig: ApplicationConfig = {
         })
       )
     ),
-    importProvidersFrom(provideStorage(() => getStorage())),
   ],
 };

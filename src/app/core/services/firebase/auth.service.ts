@@ -5,6 +5,7 @@ import {
   authState,
   GoogleAuthProvider,
   isSignInWithEmailLink,
+  linkWithRedirect,
   sendSignInLinkToEmail,
   signInWithEmailLink,
   signInWithPopup,
@@ -18,6 +19,7 @@ import {
 export class AuthService {
   private auth = inject(Auth);
   authState = authState(this.auth);
+  user = user(this.auth);
 
   loginWithGoogle() {
     return signInWithPopup(this.auth, new GoogleAuthProvider());
@@ -35,6 +37,7 @@ export class AuthService {
         email = prompt('Veuillez fournir votre e-mail pour la confirmation');
       }
       signInWithEmailLink(this.auth, email!, location.href);
+      linkWithRedirect(this.auth.currentUser!, new GoogleAuthProvider());
     }
   }
 

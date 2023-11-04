@@ -56,9 +56,10 @@ tr.detail-row {
   img {
     border-radius: 8px;
     margin: 1rem;
+    object-fit: cover;
   }
 }
 .mat-footer-row {
   font-weight: bold;
-  background: gray;
+  background: #aeaeae19;
 }

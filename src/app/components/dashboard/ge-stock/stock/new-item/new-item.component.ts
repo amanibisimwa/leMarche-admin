@@ -108,6 +108,7 @@ export class NewItemComponent {
   });
 
   onSubmit() {
+    this.isDisabledBtn = true;
     const formValue = this.addItemForm.value;
     const newItemDocId = this.uts.toPascalCase(formValue.id!);
 
@@ -127,6 +128,7 @@ export class NewItemComponent {
     };
 
     this.fs.setItem(item);
+    this.imageUrls.set([]);
     const notificationMsg = `${item.title} enregistré avec succès`;
     this.snackBar.open(notificationMsg, '', { duration: 5000 });
   }

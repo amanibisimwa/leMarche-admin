@@ -2,8 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
@@ -14,9 +12,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from 'src/app/core/services/firebase/auth.service';
 import { appTitle } from 'src/app/app.config';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatIconModule } from '@angular/material/icon';
 import { FirestoreService } from 'src/app/core/services/firebase/firestore.service';
-import { AuthProviderComponent } from './auth-provider.component';
+import { AuthProviderComponent } from './auth-providers.component';
 
 @Component({
   selector: 'app-login',
@@ -48,10 +45,6 @@ import { AuthProviderComponent } from './auth-provider.component';
 
       .mat-divider {
         margin: 1rem 0;
-      }
-
-      mat-form-field {
-        width: 100%;
       }
     `,
   ],
